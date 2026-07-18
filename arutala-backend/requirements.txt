@@ -1,0 +1,13 @@
+fastapi
+uvicorn
+sqlmodel
+pydantic
+PyJWT
+bcrypt
+python-multipart
+httpx
+python-dotenv
+midtransclient==1.4.2
+pydantic-settings
+google-auth
+psycopg2-binary

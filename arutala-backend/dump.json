@@ -1,0 +1,17 @@
+''[
+    {
+        "slug": "discovery-set",
+        "name": "Discovery",
+        "family": "Floral",
+        "subtitle": "The Olfactive Journey | 5 x 2ml Vials + Gift Voucher",
+        "description": "Explore the entire ARUTALA core collection at your own pace. This elegant box contains five 2ml glass vials of our signature extrait de parfums. As a token of appreciation, purchasing this set includes a complimentary voucher worth Rp 350.000 towards your first full-size (100ml) bottle purchase.",
+        "price": 350000,
+        "images": {
+            "primary": "/static/images/img_51d58c1e81.jpg",
+            "secondary": "/static/images/img_d0b95f35de.jpg"
+        },
+        "notes": {
+            "top": [
+                "Rintik",
+                "Hening"
+            ]

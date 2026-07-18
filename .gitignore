@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+arutala-frontend/node_modules/
+arutala-backend/venv/
+arutala-backend/.venv/
+venv/
+.venv/
+ENV/
+env/
+
+# Build outputs
+dist/
+arutala-frontend/dist/
+build/
+out/
+.vite/
+arutala-frontend/.vite/
+
+# Local configuration files
+.env
+.env.local
+.env.*.local
+arutala-backend/.env
+arutala-frontend/.env
+arutala-frontend/.env.local
+
+# Databases & local storage
+*.db
+*.sqlite3
+arutala-backend/arutala.db
+
+# Archives and large binaries
+*.zip
+*.tar.gz
+*.rar
+node.zip
+
+# Extracted Node.js binaries (local runtime)
+node-v20.12.0-win-x64/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor settings
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
