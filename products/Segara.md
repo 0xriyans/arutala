@@ -35,26 +35,27 @@ As the sun tilts west, the scent on their skin shifts to sweet, salty, warm, and
 ## 📸 Image Generation Prompts
 
 ### 1. Primary Image - Product Packshot for Card
-**Visual Concept:** Foto produk studio minimalis kelautan. Botol parfum silinder kaca 100ml transparan dengan dasar bertekstur riak air halus dan tutup kayu driftwood abu-abu alami, berlabel merk **"Arutala"** dengan nama varian **"Segara"** di bawahnya menggunakan jenis font Inter sans-serif modern yang mengalir, elegan, dan organik. Botol diletakkan di atas lempengan batu pasir bertekstur halus warna krem laut dengan latar belakang polos biru keabu-abuan pucat (*dusty coastal blue*). Pencahayaan alami dari samping menghasilkan bayangan lembut yang damai.
+**Visual Concept:** Foto produk mewah minimalis bernuansa laut. Botol silinder kaca tebal dengan dasar riak air yang memantulkan cahaya, dan tutup kayu driftwood abu-abu alami dengan serat kayu yang detail. Botol diletakkan secara terpusat di atas bongkahan batu karang putih kasar (*sea-weathered white coral rock*) dengan latar belakang gradasi biru laut dalam ke abu-abu berkabut yang tenang. Efek pencahayaan sinematik dengan bayangan dramatis layaknya sinar matahari sore menerobos air laut.
 **Prompt:**
-> *High-end minimalist product shot of a 100ml clear glass perfume bottle with a water-ripple textured base and a grey driftwood cap, printed with the brand name "ARUTALA" and the product name "Segara" in elegant clean Inter sans-serif organic typography. The bottle sits centered on a coastal sandstone slab. Solid dusty coastal blue studio background. Soft natural side lighting, gentle clean shadows, 8k.*
+> *High-end commercial product shot of a cylindrical clear glass perfume bottle with a water-ripple textured bottom and a raw grey driftwood cap, printed with the brand "ARUTALA" and "Segara" in sleek organic Inter sans-serif typography. The bottle is resting on a coarse, white sea-weathered coral rock against a soft, gradient deep coastal blue to misty grey studio background. Golden hour sunbeams filtering through water, casting caustic light reflections and long, dramatic shadows. Minimalist, ultra-luxury aesthetic, photorealistic, 8k.*
 
 ### 2. Secondary Image - Product Close-up
-**Visual Concept:** Foto close-up makro dari botol parfum Segara. Menyoroti tekstur riak air halus pada dasar kaca botol dan guratan serat alami pada tutup kayu driftwood abu-abu dengan latar laut buram.
+**Visual Concept:** Foto makro close-up ekstrem pada tutup driftwood abu-abu bertekstur kasar dan cetakan nama "Segara" dalam tipografi Inter sans-serif organik yang ramping dengan tinta perak bertekstur, serta beberapa butiran garam laut menempel halus pada bahu botol kaca.
 **Prompt:**
-> *Extreme close-up macro photography of the Segara perfume bottle. Capturing the water-ripple texture at the glass base and the natural grain of the grey driftwood cap. Soft bokeh of a coastal background, highly detailed, 8k.*
+> *Extreme close-up macro photography of the Segara perfume bottle. Focusing on the raw, deeply textured grain of the grey driftwood cap and the sleek silver embossed Inter sans-serif typography on the glass. A few glistening sea salt crystals rest on the shoulder of the bottle. Soft bokeh, misty marine lighting, highly detailed, 8k.*
 
 ### 3. Tertiary Image - Product Lifestyle
-**Visual Concept:** Foto gaya hidup botol parfum Segara. Botol diletakkan di atas rak kayu rustic di rumah pantai terbuka yang menghadap langsung ke lautan luas pada pagi hari yang berangin lembut.
+**Visual Concept:** Foto gaya hidup botol parfum Segara. Botol diletakkan di atas dek kayu kapal pinisi mewah yang sedang berlayar saat matahari terbenam (*golden hour*), dengan latar belakang cakrawala laut lepas yang dramatis dan keemasan.
 **Prompt:**
-> *Lifestyle product photography of the Segara perfume bottle placed on a rustic wood shelf next to a piece of white coral. An open coastal beach house setting, looking out to a soft blue ocean with morning light, serene, 8k.*
+> *Lifestyle product photography of the Segara perfume bottle placed on the rustic teak wood deck of a luxury sailing yacht. The background features a breathtaking golden sunset over the calm open ocean. Soft sea breeze atmosphere, warm low-key lighting, cinematic depth of field, 8k.*
 
 ### 4. Quaternary Image - Fragrance Notes/Ingredients
-**Visual Concept:** Komposisi bahan utama beraroma laut tanpa botol. Butiran kasar kristal garam laut putih, daun sage pesisir kehijauan yang bertekstur, dan sebongkah ambergris alami di atas potongan kayu driftwood basah.
+**Visual Concept:** Komposisi still-life artistik bahan-bahan Segara tanpa botol: bongkahan garam laut kasar yang berkilau, helaian daun sage pesisir yang kehijauan, dan bongkahan ambergris bertekstur bersandar pada kayu apung yang basah terkena ombak.
 **Prompt:**
-> *A coastal-inspired still-life composition of coarse white sea salt crystals, fresh coastal sage leaves, and a textured element representing ambergris on a piece of driftwood. Soft ocean breeze lighting, pale blue background, highly detailed, 8k.*
+> *A fine-art still-life flatlay of sparkling coarse sea salt crystals, fresh wet coastal sage leaves, and a textured natural ambergris chunk resting on sea-swept wet driftwood. Coastal morning light, highly detailed textures, organic marine theme, 8k.*
 
 ### 5. Quinary Image - Ambient Mood
-**Visual Concept:** Foto suasana ambient lautan. Tebing pantai yang terjal dengan ombak biru bergulung menyentuh pasir, diselimuti angin laut yang segar dan dingin.
+**Visual Concept:** Foto suasana ambient lautan yang megah. Tebing karang pantai Nusa Penida yang megah saat matahari terbit berkabut, ombak biru safir menghantam karang, memercikkan buih putih yang dramatis.
 **Prompt:**
-> *A peaceful, windswept coastline under an overcast sky, with gentle waves crashing on sand. Fresh ocean breeze mist, raw coastal rocks, serene and atmospheric blue tones, cinematic landscape photography, 8k.*
+> *A majestic, cinematic wide-angle shot of a rugged coastal cliff in Nusa Penida during a misty sunrise. Deep sapphire blue waves crashing violently against ancient rocks, sending dramatic white sea spray into the cool ocean air. Ethereal morning light, atmospheric mist, photorealistic, 8k.*
+
