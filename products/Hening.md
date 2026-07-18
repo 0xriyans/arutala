@@ -35,26 +35,26 @@ Hening is their protector, an inner sanctuary they carry wherever they step in t
 ## 📸 Image Generation Prompts
 
 ### 1. Primary Image - Product Packshot for Card
-**Visual Concept:** Foto produk studio minimalis tenang. Botol parfum kaca kubus 100ml transparan berpresisi tinggi dengan dasar kaca tebal dan tutup silinder kayu abu-abu gelap, berlabel merk **"Arutala"** dengan nama varian **"Hening"** di bawahnya menggunakan jenis font Inter sans-serif minimalis yang tipis dan kontemplatif (*thin minimal Inter sans-serif typography*). Botol diletakkan di atas balok semen beton halus abu-abu dingin dengan latar belakang polos abu-abu arang senada (*slate grey*). Pencahayaan bayangan tajam bergaya kontemporer.
+**Visual Concept:** Foto produk studio minimalis kontemporer yang hening dan tenang. Botol parfum kaca kubik 100ml transparan berpresisi tinggi dengan dasar kaca tebal yang berat dan tutup silinder dari kayu cendana arang hitam (*charcoal sandalwood*) bertekstur alami. Botol diletakkan secara terpusat di atas balok semen beton arsitektural abu-abu berpori halus, dengan latar belakang polos abu-abu slate gelap (*deep slate grey*). Pencahayaan dramatis satu arah menciptakan bayangan kontras tinggi yang tenang dan bersih.
 **Prompt:**
-> *High-end minimalist product shot of a square 100ml clear glass perfume bottle with a thick glass base and a matte dark charcoal cylindrical wooden cap, printed with the brand name "ARUTALA" and the product name "Hening" in a clean thin modern Inter sans-serif typography. The bottle is placed on a smooth, clean light grey concrete block against a solid dark slate grey background. Clean shadows, sharp minimalist studio lighting, 8k.*
+> *High-end architectural product shot of a cubic 100ml clear glass perfume bottle with an ultra-thick heavy base and a cylindrical dark charcoal-stained sandalwood cap, printed with the brand name "ARUTALA" and the product name "Hening" in crisp, ultra-thin minimal Inter sans-serif typography. The bottle sits centered on a porous, light grey concrete pedestal against a solid dark slate grey studio background. Sharp, clean architectural side lighting creating long dramatic shadows, serene meditative atmosphere, 8k.*
 
 ### 2. Secondary Image - Product Close-up
-**Visual Concept:** Foto close-up makro dari botol parfum Hening. Memperlihatkan tekstur serat tutup kayu silinder abu-abu gelap dan tepian presisi dari dasar kaca tebal botol di atas beton abu-abu.
+**Visual Concept:** Foto makro close-up ekstrem pada tutup kayu cendana arang yang bertekstur guratan alami dan dasar kaca tebal botol Hening. Memantulkan bias cahaya abu-abu kebiruan yang lembut di atas permukaan beton.
 **Prompt:**
-> *Extreme close-up macro photography of the Hening perfume bottle, focusing on the natural wood grain texture of the dark charcoal wooden cap and the sharp angles of the thick glass base on smooth grey concrete. Minimalist, highly detailed, 8k.*
+> *Extreme close-up macro photography of the Hening perfume bottle, focusing on the organic wood grain texture of the dark charcoal sandalwood cap and the heavy, light-refracting edge of the thick glass base. Soft blue-grey twilight light reflections, resting on smooth concrete, minimalist, highly detailed, 8k.*
 
 ### 3. Tertiary Image - Product Lifestyle
-**Visual Concept:** Foto gaya hidup botol parfum Hening. Botol diletakkan di atas meja nakas kayu oak muda bergaya Japandi di samping tumpukan linen bersih yang terlipat rapi dan vas keramik kecil berisi bunga kering.
+**Visual Concept:** Foto gaya hidup minimalis Hening. Botol diletakkan di atas meja nakas kayu ek muda bergaya Japandi yang bersanding dengan cangkir teh keramik buatan tangan dan tumpukan linen putih bertekstur alami, diterangi cahaya senja redup (*twilight*) yang menenangkan dari jendela.
 **Prompt:**
-> *Lifestyle product photography of the Hening perfume bottle placed on a minimalist light-oak bedside table next to neatly folded white linen sheets. Soft, diffused warm twilight light, serene and calm bedroom atmosphere, 8k.*
+> *Lifestyle product photography of the Hening perfume bottle placed on a minimalist light-oak Japandi-style bedside table. Next to a handmade ceramic tea cup and a stack of textured organic white linen sheets. Soft, dim twilight streaming through a window, peaceful and quiet bedroom interior, cinematic depth of field, 8k.*
 
 ### 4. Quaternary Image - Fragrance Notes/Ingredients
-**Visual Concept:** Komposisi bahan utama yang tenang tanpa botol. Tangkai bunga lavender Prancis berwarna ungu lembut, serpihan kayu cendana (*sandalwood*) yang halus, dan helaian kain bertekstur lembut mirip cashmere wood.
+**Visual Concept:** Komposisi still-life artistik bahan-bahan Hening tanpa botol: kuntum bunga lavender Prancis ungu kering, potongan balok kayu cendana halus bertekstur, dan helaian kain wol cashmere abu-abu lembut yang terlipat anggun di atas meja semen abu-abu.
 **Prompt:**
-> *A calming still-life composition of purple French lavender sprigs, smooth sandalwood blocks, and soft cashmere fabric textures. Soft diffused natural light, light grey concrete background, serene and minimal, 8k.*
+> *A fine-art still-life flatlay of dry French purple lavender sprigs, smooth block fragments of raw sandalwood, and a soft, folded charcoal grey cashmere fabric. Arranged on a cool grey concrete slab, diffused tranquil lighting, relaxing and comforting textures, 8k.*
 
 ### 5. Quinary Image - Ambient Mood
-**Visual Concept:** Foto suasana ambient hening kontemplatif. Taman Zen Jepang di waktu senja yang berselimut kabut tipis dan embun sore.
+**Visual Concept:** Foto suasana hening dan damai. Sebuah studio meditasi minimalis bergaya arsitektur brutalist dengan jendela kaca besar menghadap ke hutan pinus berkabut tebal di waktu senja.
 **Prompt:**
-> *A quiet Zen garden at dusk, soft twilight mist hanging over smooth stones and raked gravel. Gentle, meditative silence, calm and peaceful atmosphere, cool tones, cinematic film style, 8k.*
+> *A serene, minimalist brutalist concrete meditation studio with a massive floor-to-ceiling glass window overlooking a quiet pine forest shrouded in thick evening fog. Ethereal soft twilight blue light, calm, meditative, and silent atmosphere, photorealistic, 8k.*
