@@ -39,26 +39,26 @@ Whenever you are ready, use it towards your first full-size (100ml) bottle. Let 
 ## 📸 Image Generation Prompts
 
 ### 1. Primary Image - Product Packshot for Card
-**Visual Concept:** Foto produk studio minimalis elegan. Sebuah kotak parfum kokoh bertekstur premium dalam warna hitam matte (matte black) yang terbuka, menampilkan lima buah botol vial kaca 2ml yang tersusun rapi di dalamnya. Kotak tersebut memiliki tulisan "ARUTALA" menggunakan font Cormorant Garamond serif beraksen perak tipis. Di sebelah kotak, terdapat secarik kartu voucher elegan berbahan kertas tebal (cotton paper). Latar belakang abu-abu arang yang bersih.
+**Visual Concept:** Foto produk studio minimalis ultra-mewah. Sebuah kotak presentasi hitam matte bertekstur linen premium terbuka lebar, menampilkan lima buah vial kaca 2ml yang tersusun rapi di atas bantalan beludru hitam. Di sebelahnya terletak kartu voucher digital bertekstur kertas kapas dengan cetakan perak yang elegan. Background abu-abu arang studio yang bersih dengan pencahayaan dramatis dari samping yang memperlihatkan tekstur serat kertas dan kilau kaca vial.
 **Prompt:**
-> *High-end minimalist product shot of an open matte black premium textured presentation box containing five neat 2ml glass perfume vials. The brand name "ARUTALA" is printed on the box in an elegant silver Cormorant Garamond serif typography. A thick, elegant cotton paper voucher card rests gently beside the box. Clean charcoal grey studio background. Soft, diffused lighting highlighting the texture of the paper and the reflections on the glass vials, luxury editorial style, 8k.*
+> *High-end commercial product shot of an open, premium matte black linen-textured presentation box. Inside, five sleek 2ml glass perfume vials are nestled in a black velvet tray, reflecting soft light. Resting elegantly next to the box is a textured cotton-paper gift voucher card with silver foil lettering. Solid clean charcoal grey background. Sophisticated side studio lighting, sharp realistic shadows, emphasizing premium textures, luxury editorial style, 8k.*
 
 ### 2. Secondary Image - Product Close-up
-**Visual Concept:** Foto close-up mendetail dari salah satu botol vial kaca 2ml ARUTALA. Memperlihatkan label botol yang minimalis dengan font Inter sans-serif dan tekstur cairan parfum di dalamnya, diletakkan berdampingan dengan kartu voucher.
+**Visual Concept:** Foto makro close-up ekstrem dari satu vial kaca 2ml yang memperlihatkan detail label tipis dengan font Inter sans-serif dan kilau cairan parfum berwarna kuning keemasan di dalamnya. Di latar belakang yang sedikit buram, terlihat kartu voucher kertas tebal.
 **Prompt:**
-> *Extreme close-up macro photography of a single 2ml glass perfume vial from the ARUTALA Discovery Set. Highlighting the minimal label with Inter sans-serif typography and the golden liquid inside. Resting next to an elegant cotton paper voucher card. Soft editorial lighting, clean background, highly detailed, 8k.*
+> *Extreme close-up macro photography of a single 2ml glass perfume vial from the ARUTALA Discovery Set. Highlighting the crisp, minimal white label with clean Inter sans-serif typography, showcasing the clear golden liquid inside the vial. Soft focus background showing the edges of a luxury cotton-paper voucher card. Warm luxury lighting, shallow depth of field, highly detailed, 8k.*
 
 ### 3. Tertiary Image - Product Lifestyle
-**Visual Concept:** Foto gaya hidup kotak Discovery Set. Kotak dalam posisi terbuka dipajang di atas meja rias marmer putih yang modern di samping lilin aromaterapi yang menyala lembut.
+**Visual Concept:** Foto gaya hidup Discovery Set di sudut ruangan butik atelier yang mewah. Kotak terbuka diletakkan di atas meja rias marmer Carrara berbingkai kuningan, di samping lilin aromaterapi kaca minimalis yang menyala lembut, memancarkan suasana sore yang hangat dan intim.
 **Prompt:**
-> *Lifestyle product photography of the open ARUTALA Discovery Set box sitting on a modern white marble vanity table. Next to a softly lit scented candle in a minimalist glass jar. High-end lifestyle atmosphere, warm soft focus, 8k.*
+> *Lifestyle product photography of the open ARUTALA Discovery Set box sitting on a polished Carrara marble vanity table with brass accents. Next to the box, a minimalist glass scented candle is lit, casting a warm flickering glow. High-end Parisian boutique interior style, soft-focus background of a vanity mirror, warm and inviting atmosphere, 8k.*
 
 ### 4. Quaternary Image - Fragrance Notes/Ingredients
-**Visual Concept:** Komposisi bahan baku representatif yang artistik tanpa botol. Menggabungkan unsur-unsur aroma koleksi utama: satu batang vanilla, kelopak melati putih, serpihan kayu cendana, dan daun tembakau kering.
+**Visual Concept:** Komposisi flatlay artistik dekonstruksi bahan-bahan aroma utama ARUTALA: polong vanila Madagaskar hitam berkerut, kelopak melati Mesir putih segar, serpihan kayu cendana Mysore yang halus, dan helai daun tembakau kering kecokelatan di atas latar belakang batu semen bertekstur gelap.
 **Prompt:**
-> *A beautiful still-life flatlay composition representing key ingredients: a whole vanilla bean, white jasmine petals, smooth sandalwood chips, and a dried tobacco leaf. Soft artistic studio lighting, elegant charcoal background, 8k.*
+> *A fine-art still-life flatlay composition showcasing a collection of premium raw fragrance ingredients: a wrinkled black Madagascar vanilla bean, fresh white Egyptian jasmine petals, smooth shavings of Mysore sandalwood, and a rich, dry tobacco leaf. Arranged artistically on a textured dark concrete background. Soft diffused artistic lighting, rich organic textures, 8k.*
 
 ### 5. Quinary Image - Ambient Mood
-**Visual Concept:** Foto suasana ruang konsultasi butik wewangian mewah. Meja kayu panjang dengan barisan botol kaca parfum, toples berisi bahan baku kering, cahaya temaram yang hangat dan mewah.
+**Visual Concept:** Foto suasana ruang konsultasi butik wewangian (atelier) pribadi yang intim di Paris. Meja kayu walnut panjang dengan barisan botol parfum kaca berlabel minimalis, toples kaca berisi bahan baku kering, cahaya temaram yang hangat dari lampu gantung kristal, menciptakan suasana personal.
 **Prompt:**
-> *A luxurious boutique perfume atelier consultation room. A long polished wooden table displaying rows of elegant glass bottles, warm lighting, cozy and inviting high-end boutique interior, cinematic mood, 8k.*
+> *A cinematic view inside a luxurious private perfume atelier in Paris. A long polished walnut table displaying rows of elegant glass perfume bottles, glass jars containing raw botanicals, warm low-key lighting from a brass chandelier casting soft shadows. Elegant, intimate, and sophisticated boutique interior, cinematic mood, 8k.*
