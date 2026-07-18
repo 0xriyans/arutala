@@ -40,9 +40,9 @@ Hening is their protector, an inner sanctuary they carry wherever they step in t
 > *High-end architectural product shot of a cubic 100ml clear glass perfume bottle with an ultra-thick heavy base and a cylindrical dark charcoal-stained sandalwood cap, printed with the brand name "ARUTALA" and the product name "Hening" in crisp, ultra-thin minimal Inter sans-serif typography. The bottle sits centered on a porous, light grey concrete pedestal against a solid dark slate grey studio background. Sharp, clean architectural side lighting creating long dramatic shadows, serene meditative atmosphere, 8k.*
 
 ### 2. Secondary Image - Product Close-up
-**Visual Concept:** Foto makro close-up ekstrem pada tutup kayu cendana arang yang bertekstur guratan alami dan dasar kaca tebal botol Hening. Memantulkan bias cahaya abu-abu kebiruan yang lembut di atas permukaan beton.
+**Visual Concept:** Foto close-up makro ekstrem pada bagian atas botol Hening. Menampilkan detail serat kayu cendana arang yang kaya tekstur pada tutup silinder, bersanding dengan bahu botol kaca jernih yang memantulkan bias cahaya. Label nama "ARUTALA" dan "Hening" terlihat tercetak sangat tajam menggunakan font Inter sans-serif perak tipis.
 **Prompt:**
-> *Extreme close-up macro photography of the Hening perfume bottle, focusing on the organic wood grain texture of the dark charcoal sandalwood cap and the heavy, light-refracting edge of the thick glass base. Soft blue-grey twilight light reflections, resting on smooth concrete, minimalist, highly detailed, 8k.*
+> *An elegant macro close-up shot focusing on the top half of the Hening perfume bottle. Capturing the natural, rich wood grain texture of the dark charcoal sandalwood cap, and the smooth shoulder of the clear glass bottle. The brand name "ARUTALA" and the product name "Hening" are printed in crisp, ultra-thin silver Inter sans-serif typography on the glass. Moody soft twilight lighting, dark slate background, shallow depth of field with beautiful blurry bokeh, highly detailed, 8k.*
 
 ### 3. Tertiary Image - Product Lifestyle
 **Visual Concept:** Foto gaya hidup minimalis Hening. Botol diletakkan di atas meja nakas kayu ek muda bergaya Japandi yang bersanding dengan cangkir teh keramik buatan tangan dan tumpukan linen putih bertekstur alami, diterangi cahaya senja redup (*twilight*) yang menenangkan dari jendela.
