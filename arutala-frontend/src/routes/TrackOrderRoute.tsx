@@ -6,10 +6,15 @@ import { formatRupiah } from '../data/products';
 interface TrackedOrder {
   id: string;
   date: string;
-  status: 'Processing' | 'Shipped' | 'Delivered';
+  status: string;
+  payment_status: string;
   items: any[];
   total: number;
-  shipping: any;
+  customer_address: string;
+  customer_city: string;
+  customer_postalCode: string;
+  tracking_number?: string;
+  shipping_courier?: string;
 }
 
 export const TrackOrderRoute: React.FC = () => {
@@ -42,41 +47,41 @@ export const TrackOrderRoute: React.FC = () => {
     setSearched(false);
     setResult(null);
 
-    // Simulate network delay
-    setTimeout(() => {
-      // Mock lookup from localStorage (if any) or generate dummy data for demo
+    const fetchOrderData = async () => {
       try {
-        const storedOrdersStr = localStorage.getItem('arutala_orders');
-        if (storedOrdersStr) {
-          const storedOrders = JSON.parse(storedOrdersStr);
-          const found = storedOrders.find((o: any) => o.id === idToSearch || o.id === `#${idToSearch}`);
-          if (found) {
-            setResult(found);
-            setIsSearching(false);
-            setSearched(true);
-            return;
-          }
+        const res = await fetch(`/api/orders/track/${idToSearch}`);
+        
+        if (res.ok) {
+          const data = await res.json();
+          // Format date if exists
+          const formattedDate = data.date ? new Date(data.date).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }) : 'Unknown';
+          
+          setResult({
+            id: data.order_ref || data.id,
+            date: formattedDate,
+            status: data.status,
+            payment_status: data.payment_status,
+            items: data.items,
+            total: data.total,
+            customer_address: data.customer_address,
+            customer_city: data.customer_city,
+            customer_postalCode: data.customer_postalCode,
+            tracking_number: data.tracking_number,
+            shipping_courier: data.shipping_courier
+          });
+        } else {
+          setResult(null);
         }
-      } catch (err) {}
-
-      // If not found in localStorage, let's just mock a success for ANY format that looks like an order ID
-      // so the demo looks good even if they type a random one.
-      if (idToSearch.length > 5) {
-        setResult({
-          id: idToSearch.startsWith('#') ? idToSearch : `#${idToSearch.toUpperCase()}`,
-          date: new Date().toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' }),
-          status: 'Processing',
-          items: [{ name: 'Santal Blanc', quantity: 1, price: 2150000 }],
-          total: 2150000,
-          shipping: { address: 'Demo Address, Jakarta' }
-        });
-      } else {
-        setResult(null); // Too short, invalid
+      } catch (err) {
+        console.error("Failed to fetch order", err);
+        setResult(null);
+      } finally {
+        setIsSearching(false);
+        setSearched(true);
       }
-      
-      setIsSearching(false);
-      setSearched(true);
-    }, 1200);
+    };
+    
+    fetchOrderData();
   };
 
   const renderStatusIcon = (status: string) => {
@@ -109,7 +114,7 @@ export const TrackOrderRoute: React.FC = () => {
         <form onSubmit={handleTrack} className="bg-cream/20 border border-cream p-6 md:p-10">
           <div className="space-y-6">
             <div className="space-y-2">
-              <label className="text-[10px] tracking-wider uppercase font-sans text-foreground/60 font-medium">Order Reference (e.g. #ORD-123)</label>
+              <label className="text-[10px] tracking-wider uppercase font-sans text-foreground/60 font-medium">Order Reference (e.g. INV-240718-00001)</label>
               <div className="relative">
                 <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-foreground/40" />
                 <input
@@ -121,7 +126,7 @@ export const TrackOrderRoute: React.FC = () => {
                   className="w-full bg-transparent border border-cream pl-10 pr-4 py-3 text-sm font-sans focus:outline-none focus:border-foreground transition-colors text-foreground"
                 />
               </div>
-              <p className="text-[10px] text-foreground/40 font-sans italic mt-1">Hint: Try #ORD-123 for a demo</p>
+              <p className="text-[10px] text-foreground/40 font-sans italic mt-1">Hint: Check your confirmation email for the order reference</p>
             </div>
             
             <div className="space-y-2">
@@ -164,18 +169,45 @@ export const TrackOrderRoute: React.FC = () => {
                     </div>
                     <div className="flex items-center space-x-3 bg-cream/30 px-4 py-2 border border-cream">
                       {renderStatusIcon(result.status)}
-                      <span className="text-sm font-sans font-medium uppercase tracking-wider text-foreground">
-                        {result.status}
-                      </span>
+                      <div className="flex flex-col">
+                        <span className="text-sm font-sans font-medium uppercase tracking-wider text-foreground">
+                          {result.status}
+                        </span>
+                        <span className="text-[10px] font-sans text-foreground/60 uppercase tracking-widest mt-1 border-t border-cream pt-1">
+                          Payment: {result.payment_status}
+                        </span>
+                      </div>
                     </div>
                   </div>
+
+                  {result.tracking_number && (
+                    <div className="bg-[#0a0a0a] border border-[#d4af37]/30 p-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                      <div>
+                        <p className="text-[10px] tracking-widest uppercase font-sans text-[#d4af37] mb-1">Tracking Resi ({result.shipping_courier || 'Courier'})</p>
+                        <p className="font-mono text-xl text-foreground tracking-wider">{result.tracking_number}</p>
+                      </div>
+                      <div className="mt-4 md:mt-0 flex items-center space-x-4">
+                        <a 
+                          href={`https://cekresi.com/?noresi=${result.tracking_number}`} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="bg-[#d4af37] text-background px-4 py-2 text-xs font-sans font-medium uppercase tracking-wider hover:bg-[#b0902c] transition-colors"
+                        >
+                          TRACK PACKAGE
+                        </a>
+                        <div className="text-right hidden md:block">
+                          <Truck size={24} className="text-[#d4af37]/50 inline-block" />
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <div className="space-y-6">
                     <h4 className="text-[10px] tracking-widest uppercase font-sans text-foreground/50 border-b border-cream pb-2">Items Included</h4>
                     <div className="space-y-4">
                       {result.items.map((item, idx) => (
                         <div key={idx} className="flex justify-between items-center text-sm font-sans">
-                          <span className="text-foreground"><span className="text-foreground/50 mr-2">{item.quantity}x</span> {item.name}</span>
+                          <span className="text-foreground"><span className="text-foreground/50 mr-2">{item.quantity}x</span> {item.productName || item.name}</span>
                           <span className="text-foreground/70">{formatRupiah(item.price)}</span>
                         </div>
                       ))}
@@ -186,12 +218,11 @@ export const TrackOrderRoute: React.FC = () => {
                     </div>
                   </div>
                   
-                  {result.shipping && (
-                     <div className="bg-muted p-4 border border-cream text-xs font-sans text-foreground/70 space-y-1">
-                       <p className="font-semibold text-foreground mb-2">Shipping Destination:</p>
-                       <p>{result.shipping.address}</p>
-                     </div>
-                  )}
+                  <div className="bg-muted p-4 border border-cream text-xs font-sans text-foreground/70 space-y-1">
+                    <p className="font-semibold text-foreground mb-2">Shipping Destination:</p>
+                    <p>{result.customer_address}</p>
+                    <p>{result.customer_city}, {result.customer_postalCode}</p>
+                  </div>
                 </div>
               ) : (
                 <div className="text-center py-12 border border-dashed border-cream">

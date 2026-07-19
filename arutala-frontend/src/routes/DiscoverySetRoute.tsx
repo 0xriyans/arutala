@@ -256,7 +256,7 @@ export const DiscoverySetRoute: React.FC = () => {
             <div className="w-full aspect-[3/4] border border-foreground/10 bg-cream/5 p-4 shadow-sm">
               <div className="relative w-full h-full overflow-hidden border border-foreground/5 bg-background">
                 <ParallaxImage 
-                  src="https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&q=80&w=1000&h=1200"
+                  src={discoverySet.images.primary}
                   alt="Discovery Set Vials"
                   intensity={20}
                   className="w-full h-full"

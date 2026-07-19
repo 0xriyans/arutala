@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { Product, products, formatRupiah } from '../data/products';
 import { FragranceNotes } from '../components/FragranceNotes';
 import { useCart } from '../context/cart-context';
-import { Reveal } from '../components/Reveal';
-import { Plus, Minus, ArrowLeft, ShoppingBag, Truck, Sparkles, AlertTriangle } from 'lucide-react';
+import { Reveal, StaggerContainer, StaggerItem } from '../components/Reveal';
+import { Plus, Minus, ArrowLeft, ShoppingBag, Truck, Sparkles, AlertTriangle, Droplets, FlaskConical, MapPin, Package } from 'lucide-react';
 import { motion } from 'motion/react';
 
 import { ProgressiveImage } from '../components/ProgressiveImage';
@@ -247,7 +247,153 @@ export const ProductDetailRoute: React.FC<ProductDetailRouteProps> = ({ slug }) 
   };
 
   return (
-    <div className="bg-background min-h-screen pt-32 pb-24" id={`product-detail-page-${product.slug}`}>
+    <div className="bg-background min-h-screen pt-24 pb-24" id={`product-detail-page-${product.slug}`}>
+      
+      {/* Product Typography Hero (Exclusive to Discovery Set) */}
+      {product.slug === 'discovery-set' && (
+        <div className="w-full flex items-center justify-center pt-24 pb-16 md:pt-32 md:pb-24 border-b border-foreground/5 relative overflow-hidden mb-12">
+          {/* Subtle background glow */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-accent-gold/5 rounded-full blur-[100px] pointer-events-none" />
+          
+          <div className="text-center space-y-8 px-6 max-w-3xl relative z-10">
+            <StaggerContainer delay={0.1} className="flex flex-col items-center">
+              <StaggerItem yOffset={20}>
+                <div className="inline-flex items-center gap-4 mb-4">
+                  <div className="w-12 h-[1px] bg-accent-gold/40" />
+                  <p className="text-[9px] tracking-[0.5em] uppercase font-sans font-medium text-accent-gold">
+                    Your Olfactive Journey
+                  </p>
+                  <div className="w-12 h-[1px] bg-accent-gold/40" />
+                </div>
+              </StaggerItem>
+              <StaggerItem yOffset={30}>
+                <h1 className="font-serif text-6xl md:text-8xl lg:text-[110px] font-light text-foreground leading-[0.85] tracking-tight capitalize">
+                  {product.name.slice(0, Math.ceil(product.name.length / 2))}
+                  <span className="italic text-accent-gold/90">{product.name.slice(Math.ceil(product.name.length / 2))}.</span>
+                </h1>
+              </StaggerItem>
+              <StaggerItem yOffset={20}>
+                <p className="font-sans text-sm md:text-base text-gray-500 font-light max-w-lg mx-auto leading-relaxed mt-10">
+                  An intimate introduction to the ARUTALA collection. Curate five chapters of memories, beautifully presented in 2ml glass flacons, waiting to unfold on your skin.
+                </p>
+              </StaggerItem>
+              <StaggerItem yOffset={20}>
+                <div className="mt-16 w-[1px] h-24 mx-auto relative overflow-hidden bg-foreground/10">
+                  <div className="absolute inset-0 bg-gradient-to-b from-transparent via-accent-gold/50 to-transparent animate-pulse" />
+                </div>
+              </StaggerItem>
+            </StaggerContainer>
+          </div>
+        </div>
+      )}
+
+      {/* Discovery Set Exclusive Editorial Wording */}
+      {product.slug === 'discovery-set' && (
+        <div className="w-full bg-background py-24 md:py-32 border-b border-foreground/5 mb-12">
+          <div className="max-w-4xl mx-auto px-6 space-y-24 md:space-y-32">
+            
+            {/* The Genesis */}
+            <Reveal yOffset={30}>
+              <div className="flex flex-col md:flex-row gap-8 md:gap-16 items-start">
+                <div className="md:w-1/3">
+                  <p className="text-[9px] tracking-[0.3em] uppercase font-sans font-medium text-foreground/40 border-b border-foreground/10 pb-4">
+                    The Genesis
+                  </p>
+                  <h3 className="font-serif text-3xl md:text-4xl font-light text-foreground mt-6 leading-tight">
+                    Why We Created <br className="hidden md:block" />
+                    <span className="italic">Discovery</span>
+                  </h3>
+                </div>
+                <div className="md:w-2/3 space-y-6 pt-2">
+                  <p className="font-serif italic text-lg md:text-xl text-foreground/80 leading-relaxed border-l-2 border-accent-gold/30 pl-6">
+                    "Choosing a fragrance should never be a blind transaction. It is the beginning of a very personal relationship."
+                  </p>
+                  <p className="font-serif text-base md:text-lg text-foreground/75 font-light leading-[1.8]">
+                    Shopping for perfume online often forces you to guess based on mere descriptions and reviews. We wanted to completely disrupt this impersonal, high-risk experience. The <strong className="font-medium text-foreground">ARUTALA Discovery Set</strong> was born out of a desire to bring the intimate boutique atelier consultation directly into your living room.
+                  </p>
+                  <p className="font-serif text-base md:text-lg text-foreground/75 font-light leading-[1.8]">
+                    We want you to smell the actual terroir of our Indian Sandalwood, feel the resinous warmth of our Amber, and witness how each delicate top note dances with your unique skin chemistry over several hours—long before you ever commit to a full-size flacon.
+                  </p>
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Chapter 1: Invitation */}
+            <Reveal yOffset={30}>
+              <div className="flex flex-col md:flex-row gap-8 md:gap-16 items-start">
+                <div className="md:w-1/3">
+                  <p className="text-[9px] tracking-[0.3em] uppercase font-sans font-medium text-foreground/40 border-b border-foreground/10 pb-4">
+                    Chapitre I
+                  </p>
+                  <h3 className="font-serif text-3xl md:text-4xl font-light text-foreground mt-6 leading-tight">
+                    A Personal <br className="hidden md:block" />
+                    <span className="italic">Invitation</span>
+                  </h3>
+                </div>
+                <div className="md:w-2/3 space-y-6 pt-2">
+                  <p className="font-serif italic text-lg md:text-xl text-foreground/80 leading-relaxed border-l-2 border-accent-gold/30 pl-6">
+                    "We believe finding your signature scent is an intimate journey that shouldn't be rushed."
+                  </p>
+                  <p className="font-serif text-base md:text-lg text-foreground/75 font-light leading-[1.8]">
+                    This Discovery Set is our personal invitation for you to experience the poetry of our boutique atelier in the comfort of your own home, allowing each fragrance to interact beautifully with your unique skin chemistry.
+                  </p>
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Chapter 2: The Concept */}
+            <Reveal yOffset={30}>
+              <div className="flex flex-col md:flex-row gap-8 md:gap-16 items-start">
+                <div className="md:w-1/3 md:order-2">
+                  <p className="text-[9px] tracking-[0.3em] uppercase font-sans font-medium text-foreground/40 border-b border-foreground/10 pb-4 text-left md:text-right">
+                    Chapitre II
+                  </p>
+                  <h3 className="font-serif text-3xl md:text-4xl font-light text-foreground mt-6 leading-tight text-left md:text-right">
+                    The <br className="hidden md:block" />
+                    <span className="italic">Concept</span>
+                  </h3>
+                </div>
+                <div className="md:w-2/3 space-y-6 pt-2 md:order-1 text-left md:text-right">
+                  <p className="font-serif text-base md:text-lg text-foreground/75 font-light leading-[1.8]">
+                    You are in complete control of your exploration. Curate your own elegant box containing five 2ml glass vials of our signature extrait de parfums. 
+                  </p>
+                  <p className="font-serif text-base md:text-lg text-foreground/75 font-light leading-[1.8]">
+                    Take your time to live with each scent, layer them, and let the different chapters of memories unfold naturally throughout your day.
+                  </p>
+                </div>
+              </div>
+            </Reveal>
+
+            {/* Chapter 3: The Reward */}
+            <Reveal yOffset={30}>
+              <div className="flex flex-col md:flex-row gap-8 md:gap-16 items-start">
+                <div className="md:w-1/3">
+                  <p className="text-[9px] tracking-[0.3em] uppercase font-sans font-medium text-foreground/40 border-b border-foreground/10 pb-4">
+                    Chapitre III
+                  </p>
+                  <h3 className="font-serif text-3xl md:text-4xl font-light text-foreground mt-6 leading-tight">
+                    The <br className="hidden md:block" />
+                    <span className="italic">Reward</span>
+                  </h3>
+                </div>
+                <div className="md:w-2/3 space-y-6 pt-2">
+                  <div className="p-8 bg-foreground/5 border border-foreground/10 shadow-sm relative overflow-hidden">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-accent-gold/5 rounded-full blur-2xl pointer-events-none" />
+                    <p className="font-serif text-base md:text-lg text-foreground/75 font-light leading-[1.8] relative z-10">
+                      As a token of our deepest appreciation for trusting ARUTALA, every purchase of this set includes a complimentary digital voucher worth <strong className="font-serif italic font-normal text-xl">Rp 350.000</strong>. 
+                    </p>
+                    <p className="font-serif text-base md:text-lg text-foreground/75 font-light leading-[1.8] mt-4 relative z-10">
+                      Whenever you are ready, use it towards your first full-size (100ml) bottle. Let your journey guide your next step.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </Reveal>
+
+          </div>
+        </div>
+      )}
+
       <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-12">
         
         {/* Subtle Breadcrumb Navigation */}
@@ -466,14 +612,14 @@ export const ProductDetailRoute: React.FC<ProductDetailRouteProps> = ({ slug }) 
             {/* Specifications Tabs (Details, Ingredients, Shipping) */}
             <div className="border border-cream" id="specs-accordion">
               {/* Tabs list */}
-              <div className="flex border-b border-cream text-[9px] tracking-widest font-sans uppercase font-medium text-foreground">
+              <div className="flex border-b border-cream">
                 {(['details', 'ingredients', 'shipping'] as const).map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab)}
                     className={`
-                      flex-1 py-3 text-center transition-all cursor-pointer relative
-                      ${activeTab === tab ? 'text-foreground font-semibold' : 'text-foreground/40 hover:text-foreground'}
+                      flex-1 py-4 text-center transition-all cursor-pointer relative text-[10px] tracking-[0.2em] uppercase font-sans
+                      ${activeTab === tab ? 'text-foreground font-bold' : 'text-foreground/40 hover:text-foreground font-medium'}
                     `}
                   >
                     {tab}
@@ -490,24 +636,36 @@ export const ProductDetailRoute: React.FC<ProductDetailRouteProps> = ({ slug }) 
               {/* Tab Content panels */}
               <div className="p-5 text-xs text-gray-500 font-sans leading-relaxed min-h-[100px]">
                 {activeTab === 'details' && (
-                  <ul className="space-y-2">
-                    <li className="flex justify-between border-b border-cream pb-1">
-                      <span className="text-gray-400 uppercase tracking-wider font-medium text-[9px]">Concentration</span>
-                      <span className="font-serif italic text-foreground font-medium">{product.concentration}</span>
-                    </li>
-                    <li className="flex justify-between border-b border-cream pb-1">
-                      <span className="text-gray-400 uppercase tracking-wider font-medium text-[9px]">Volume</span>
-                      <span className="font-mono text-foreground font-medium">{product.volume}</span>
-                    </li>
-                    <li className="flex justify-between border-b border-cream pb-1">
-                      <span className="text-gray-400 uppercase tracking-wider font-medium text-[9px]">Origin</span>
-                      <span className="font-serif italic text-foreground font-medium">Jakarta, Indonesia</span>
-                    </li>
-                    <li className="flex justify-between pb-1">
-                      <span className="text-gray-400 uppercase tracking-wider font-medium text-[9px]">Packaging</span>
-                      <span className="text-foreground font-light">Lead-free heavy clear glass flacon, hand-stamped label</span>
-                    </li>
-                  </ul>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="flex flex-col justify-center space-y-1.5 p-3 bg-cream/5 border border-cream/30 hover:border-cream/70 transition-colors rounded-sm">
+                      <div className="flex items-center space-x-1.5 text-[9px] uppercase tracking-wider text-foreground/40 font-semibold">
+                        <FlaskConical size={10} />
+                        <span>Concentration</span>
+                      </div>
+                      <span className="font-serif italic text-foreground font-medium text-[13px]">{product.concentration}</span>
+                    </div>
+                    <div className="flex flex-col justify-center space-y-1.5 p-3 bg-cream/5 border border-cream/30 hover:border-cream/70 transition-colors rounded-sm">
+                      <div className="flex items-center space-x-1.5 text-[9px] uppercase tracking-wider text-foreground/40 font-semibold">
+                        <Droplets size={10} />
+                        <span>Volume</span>
+                      </div>
+                      <span className="font-mono text-foreground font-medium text-[13px] tracking-wide">{product.volume}</span>
+                    </div>
+                    <div className="flex flex-col justify-center space-y-1.5 p-3 bg-cream/5 border border-cream/30 hover:border-cream/70 transition-colors rounded-sm">
+                      <div className="flex items-center space-x-1.5 text-[9px] uppercase tracking-wider text-foreground/40 font-semibold">
+                        <MapPin size={10} />
+                        <span>Origin</span>
+                      </div>
+                      <span className="font-serif italic text-foreground font-medium text-[13px]">Jakarta, Indonesia</span>
+                    </div>
+                    <div className="flex flex-col justify-center space-y-1.5 p-3 bg-cream/5 border border-cream/30 hover:border-cream/70 transition-colors rounded-sm">
+                      <div className="flex items-center space-x-1.5 text-[9px] uppercase tracking-wider text-foreground/40 font-semibold">
+                        <Package size={10} />
+                        <span>Packaging</span>
+                      </div>
+                      <span className="text-foreground font-light text-[11px] leading-snug">Lead-free heavy clear glass flacon, hand-stamped label</span>
+                    </div>
+                  </div>
                 )}
 
                 {activeTab === 'ingredients' && (
@@ -626,8 +784,8 @@ export const ProductDetailRoute: React.FC<ProductDetailRouteProps> = ({ slug }) 
                   referrerPolicy="no-referrer"
                   className="w-full h-full object-cover scale-100 hover:scale-105 transition-transform duration-[2s]"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-center pb-12 lg:pb-20 opacity-0 group-hover:opacity-100 transition-opacity duration-700">
-                  <div className="text-center transform translate-y-4 group-hover:translate-y-0 transition-transform duration-700">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end justify-center pb-12 lg:pb-20 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity duration-700">
+                  <div className="text-center transform translate-y-0 md:translate-y-4 group-hover:translate-y-0 transition-transform duration-700">
                     <p className="text-[10px] tracking-[0.3em] text-white/70 uppercase font-sans font-medium mb-3">Mood & Atmosphere</p>
                     <p className="text-white font-serif italic text-xl lg:text-3xl tracking-wide max-w-2xl mx-auto px-6 leading-relaxed shadow-sm">
                       "{product.story}"

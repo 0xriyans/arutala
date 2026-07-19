@@ -24,6 +24,7 @@ export const Hero: React.FC = () => {
       id="hero-section"
     >
       {/* Decorative vertical lines and ambient lighting (subtle craftsmanship) */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-accent-gold/5 rounded-full blur-[100px] pointer-events-none" />
       <div className="absolute inset-y-0 left-12 w-[1px] bg-cream hidden md:block" />
       <div className="absolute inset-y-0 right-12 w-[1px] bg-cream hidden md:block" />
 
@@ -34,7 +35,7 @@ export const Hero: React.FC = () => {
           <StaggerContainer delay={0.2} className="space-y-6 flex flex-col items-center">
             <StaggerItem yOffset={30}>
               <p className="text-[10px] tracking-[0.4em] uppercase font-sans font-medium text-gray-400 mb-2 block">
-                La Collection d'Éternité · No. 01
+                The Permanent Collection · No. 01
               </p>
             </StaggerItem>
 

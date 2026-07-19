@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { 
   products, 
   fetchProducts,
@@ -33,7 +34,8 @@ import {
   ChevronRight,
   PanelLeftClose,
   PanelLeftOpen,
-  LayoutDashboard
+  LayoutDashboard,
+  Database
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAuth } from '../context/auth-context';
@@ -41,10 +43,11 @@ import { AdminAnalytics } from '../components/admin/AdminAnalytics';
 import { AdminCustomers } from '../components/admin/AdminCustomers';
 import { AdminInventory } from '../components/admin/AdminInventory';
 import { AdminProfile } from '../components/admin/AdminProfile';
+import { AdminLookups } from '../components/admin/AdminLookups';
 
-// Interfaces matching definitions
 interface Order {
   id: string;
+  order_ref?: string;
   date: string;
   customer: {
     name: string;
@@ -62,17 +65,17 @@ interface Order {
   }[];
   total: number;
   status: 'Processing' | 'Shipped' | 'Delivered' | 'Cancelled';
+  payment_status?: string;
+  tracking_number?: string;
 }
 
 interface QuizLog {
   id: string;
   date: string;
   answers: {
-    question: string;
-    answer: string;
-  }[];
-  recommendedName: string;
-  recommendedSlug: string;
+    [key: string]: string;
+  };
+  recommendedProductSlug: string;
 }
 
 const compressImage = (file: File): Promise<string> => {
@@ -85,15 +88,20 @@ const compressImage = (file: File): Promise<string> => {
 };
 
 export const AdminRoute: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'orders' | 'consultations' | 'promos' | 'analytics' | 'customers' | 'inventory' | 'account'>('dashboard');
+  const [activeTab, setActiveTab] = useState<'dashboard' | 'products' | 'orders' | 'consultations' | 'promos' | 'analytics' | 'customers' | 'inventory' | 'lookups' | 'account'>('dashboard');
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
   const [productList, setProductList] = useState<Product[]>(() => [...products]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [quizHistory, setQuizHistory] = useState<QuizLog[]>([]);
-  const [promos, setPromos] = useState<QuantityPromo[]>(() => getSavedPromos());
+  const [promos, setPromos] = useState<QuantityPromo[]>([]);
+  
+  const [lookupConcentrations, setLookupConcentrations] = useState<{id: number, name: string}[]>([]);
+  const [lookupVolumes, setLookupVolumes] = useState<{id: number, name: string}[]>([]);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [familyFilter, setFamilyFilter] = useState('All');
+  const [orderFilter, setOrderFilter] = useState('All');
+  const [paymentFilter, setPaymentFilter] = useState('All');
   const [currentPage, setCurrentPage] = useState(1);
   const ITEMS_PER_PAGE = 8;
 
@@ -108,11 +116,11 @@ export const AdminRoute: React.FC = () => {
     subtitle: '',
     description: '',
     price: 3000000,
-    primaryImage: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=800&h=1000',
-    secondaryImage: 'https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?auto=format&fit=crop&q=80&w=800&h=1000',
-    tertiaryImage: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=800&h=1000',
-    scentImage: 'https://images.unsplash.com/photo-1616604847422-77983617fcbd?auto=format&fit=crop&q=80&w=800&h=1000',
-    ambienceImage: 'https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&q=80&w=1000&h=1200',
+    primaryImage: '',
+    secondaryImage: '',
+    tertiaryImage: '',
+    scentImage: '',
+    ambienceImage: '',
     volume: '100ml / 3.4 FL.OZ',
     concentration: 'Eau de Parfum',
     story: '',
@@ -151,7 +159,7 @@ export const AdminRoute: React.FC = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery, familyFilter, activeTab]);
+  }, [searchQuery, familyFilter, orderFilter, paymentFilter, activeTab]);
 
   useEffect(() => {
     if (!isAuthenticated || user?.role !== 'admin') {
@@ -180,6 +188,20 @@ export const AdminRoute: React.FC = () => {
     // Load promos
     setPromos(getSavedPromos());
 
+    // Load lookups
+    try {
+      const concRes = await fetch('/api/lookups/concentrations');
+      if (concRes.ok) {
+        setLookupConcentrations(await concRes.json());
+      }
+      const volRes = await fetch('/api/lookups/volumes');
+      if (volRes.ok) {
+        setLookupVolumes(await volRes.json());
+      }
+    } catch (e) {
+      console.error('Failed to load lookups', e);
+    }
+
     // Load orders from API
     try {
       const token = localStorage.getItem('arutala_token');
@@ -190,6 +212,9 @@ export const AdminRoute: React.FC = () => {
         const orderData = await orderRes.json();
         const mappedOrders = orderData.map((o: any) => ({
           ...o,
+          id: o.id.toString(),
+          status: o.status ? o.status.charAt(0).toUpperCase() + o.status.slice(1).toLowerCase() : o.status,
+          payment_status: o.payment_status ? o.payment_status.charAt(0).toUpperCase() + o.payment_status.slice(1).toLowerCase() : o.payment_status,
           customer: {
             name: o.customer_name || 'Unknown',
             email: o.customer_email || 'No email',
@@ -198,21 +223,37 @@ export const AdminRoute: React.FC = () => {
             postalCode: o.customer_postalCode || ''
           }
         }));
-        setOrders(mappedOrders);
+        setOrders(mappedOrders.reverse());
       }
     } catch (e) {
       console.error('Failed to load orders', e);
     }
 
-    // Load quiz consultations from localStorage (still local)
-    const storedQuizzes = localStorage.getItem('maison_quiz_history');
-    if (storedQuizzes) {
-      try {
-        setQuizHistory(JSON.parse(storedQuizzes));
-      } catch (e) {
-        setQuizHistory([]);
+    // Load promos from API
+    try {
+      const token = localStorage.getItem('arutala_token');
+      const promoRes = await fetch('/api/admin/promos', {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (promoRes.ok) {
+        setPromos(await promoRes.json());
       }
+    } catch (e) {
+      console.error('Failed to load promos', e);
     }
+
+    // Load quiz consultations from API
+    fetch(import.meta.env.VITE_API_URL + '/quizzes/', {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('maison_token')}`
+      }
+    })
+      .then(res => res.json())
+      .then(data => setQuizHistory(data))
+      .catch(err => {
+        console.error("Failed to fetch quizzes", err);
+        setQuizHistory([]);
+      });
   };
 
   const showNotification = (text: string, type: 'success' | 'error' = 'success') => {
@@ -248,24 +289,49 @@ export const AdminRoute: React.FC = () => {
     setIsPromoFormOpen(true);
   };
 
-  const handleTogglePromoStatus = (promoId: string) => {
-    const updated = promos.map(p => p.id === promoId ? { ...p, isActive: !p.isActive } : p);
-    setPromos(updated);
-    updatePromosInStore(updated);
-    showNotification("Promotion status modified.");
-  };
-
-  const handleDeletePromo = (promoId: string) => {
-    if (window.confirm("Discontinue this promotion permanently?")) {
-      const updated = promos.filter(p => p.id !== promoId);
-      setPromos(updated);
-      updatePromosInStore(updated);
-      showNotification("Promotion discontinued.");
+  const handleTogglePromoStatus = async (promoId: string) => {
+    const promo = promos.find(p => p.id === promoId);
+    if (!promo) return;
+    
+    try {
+      const token = localStorage.getItem('arutala_token');
+      const res = await fetch(`/api/admin/promos/${promoId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ ...promo, isActive: !promo.isActive })
+      });
+      if (res.ok) {
+        const updated = promos.map(p => p.id === promoId ? { ...p, isActive: !p.isActive } : p);
+        setPromos(updated);
+        showNotification("Promotion status modified.");
+      }
+    } catch (e) {
+      showNotification("Failed to update promo.", "error");
     }
   };
 
-  const handlePromoFormSubmit = (e: React.FormEvent) => {
+  const handleDeletePromo = async (promoId: string) => {
+    if (window.confirm("Discontinue this promotion permanently?")) {
+      try {
+        const token = localStorage.getItem('arutala_token');
+        const res = await fetch(`/api/admin/promos/${promoId}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const updated = promos.filter(p => p.id !== promoId);
+          setPromos(updated);
+          showNotification("Promotion discontinued.");
+        }
+      } catch (e) {
+        showNotification("Failed to delete promo.", "error");
+      }
+    }
+  };
+
+  const handlePromoFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setIsSubmitting(true);
     
     let targetProductName = "Any Fragrance";
     if (promoFormData.productSlug !== 'all') {
@@ -275,8 +341,7 @@ export const AdminRoute: React.FC = () => {
       }
     }
 
-    const finalPromo: QuantityPromo = {
-      id: editingPromo ? editingPromo.id : 'promo-' + Date.now(),
+    const payload = {
       code: promoFormData.code.toUpperCase().trim(),
       productSlug: promoFormData.productSlug,
       productName: targetProductName,
@@ -289,18 +354,37 @@ export const AdminRoute: React.FC = () => {
       isActive: editingPromo ? editingPromo.isActive : true
     };
 
-    let updatedList = [...promos];
-    if (editingPromo) {
-      updatedList = updatedList.map(p => p.id === editingPromo.id ? finalPromo : p);
-      showNotification("Promotion formulation refined.");
-    } else {
-      updatedList.push(finalPromo);
-      showNotification("New promotional campaign launched.");
+    try {
+      const token = localStorage.getItem('arutala_token');
+      const url = editingPromo ? `/api/admin/promos/${editingPromo.id}` : '/api/admin/promos';
+      const method = editingPromo ? 'PUT' : 'POST';
+      
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify(payload)
+      });
+      
+      if (res.ok) {
+        const savedPromo = await res.json();
+        let updatedList = [...promos];
+        if (editingPromo) {
+          updatedList = updatedList.map(p => p.id === editingPromo.id ? savedPromo : p);
+          showNotification("Promotion formulation refined.");
+        } else {
+          updatedList.unshift(savedPromo);
+          showNotification("New promotional campaign launched.");
+        }
+        setPromos(updatedList);
+        setIsPromoFormOpen(false);
+      } else {
+        showNotification("Failed to save promo. Code must be unique.", "error");
+      }
+    } catch (e) {
+      showNotification("Network error.", "error");
+    } finally {
+      setIsSubmitting(false);
     }
-
-    setPromos(updatedList);
-    updatePromosInStore(updatedList);
-    setIsPromoFormOpen(false);
   };
 
   const handleOpenAddForm = () => {
@@ -313,13 +397,13 @@ export const AdminRoute: React.FC = () => {
       subtitle: '',
       description: '',
       price: 3300000,
-      primaryImage: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?auto=format&fit=crop&q=80&w=800&h=1000',
-      secondaryImage: 'https://images.unsplash.com/photo-1534710951216-45c8d4825d50?auto=format&fit=crop&q=80&w=800&h=1000',
-      tertiaryImage: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=800&h=1000',
-      scentImage: 'https://images.unsplash.com/photo-1616604847422-77983617fcbd?auto=format&fit=crop&q=80&w=800&h=1000',
-      ambienceImage: 'https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&q=80&w=1000&h=1200',
-      volume: '100ml / 3.4 FL.OZ',
-      concentration: 'Eau de Parfum',
+      primaryImage: '',
+      secondaryImage: '',
+      tertiaryImage: '',
+      scentImage: '',
+      ambienceImage: '',
+      volume: '',
+      concentration: '',
       story: '',
       topNotes: '',
       heartNotes: '',
@@ -480,7 +564,7 @@ export const AdminRoute: React.FC = () => {
       }
 
       // Refresh from API
-      await fetchProducts();
+      await fetchProducts(true);
       setProductList([...products]);
       handleCloseForm();
     } catch (e) {
@@ -491,11 +575,43 @@ export const AdminRoute: React.FC = () => {
   };
 
   // Orders managers
-  const handleUpdateOrderStatus = (orderId: string, status: Order['status']) => {
-    const updated = orders.map(o => o.id === orderId ? { ...o, status } : o);
-    setOrders(updated);
-    localStorage.setItem('maison_orders', JSON.stringify(updated));
-    showNotification(`Order ${orderId} marked as ${status}.`);
+  const handleUpdateOrderStatus = async (orderId: string, status: Order['status']) => {
+    try {
+      const token = localStorage.getItem('arutala_token');
+      const res = await fetch(`/api/orders/${orderId}/status?status=${status}`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const normalizedStatus = status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() as Order['status'];
+        const updated = orders.map(o => o.id === orderId ? { ...o, status: normalizedStatus } : o);
+        setOrders(updated);
+        showNotification(`Order ${orderId} marked as ${status}.`);
+      }
+    } catch (e) {
+      showNotification("Failed to update order status.", "error");
+    }
+  };
+
+  const handleSaveTrackingNumber = async (orderId: string, trackingNumber: string) => {
+    if (!trackingNumber.trim()) return;
+    try {
+      const token = localStorage.getItem('arutala_token');
+      const res = await fetch(`/api/orders/${orderId}/tracking`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+        body: JSON.stringify({ tracking_number: trackingNumber })
+      });
+      if (res.ok) {
+        const updatedOrder = await res.json();
+        const normalizedStatus = updatedOrder.status ? updatedOrder.status.charAt(0).toUpperCase() + updatedOrder.status.slice(1).toLowerCase() : updatedOrder.status;
+        const updated = orders.map(o => o.id === orderId ? { ...o, status: normalizedStatus, tracking_number: updatedOrder.tracking_number } : o);
+        setOrders(updated);
+        showNotification(`Tracking number saved and notification email sent!`);
+      }
+    } catch (e) {
+      showNotification("Failed to save tracking number.", "error");
+    }
   };
 
   const handleDeleteOrder = (orderId: string) => {
@@ -509,19 +625,31 @@ export const AdminRoute: React.FC = () => {
 
   // Consultations logs managers
   const handleDeleteQuizLog = (quizId: string) => {
-    if (window.confirm("Delete consultation log?")) {
-      const updated = quizHistory.filter(q => q.id !== quizId);
-      setQuizHistory(updated);
-      localStorage.setItem('maison_quiz_history', JSON.stringify(updated));
-      showNotification("Consultation history log deleted.");
+    if (window.confirm("Are you sure you want to delete this consultation log?")) {
+      fetch(import.meta.env.VITE_API_URL + '/quizzes/' + quizId, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('maison_token')}`
+        }
+      }).then(() => {
+        const updated = quizHistory.filter(q => q.id !== quizId);
+        setQuizHistory(updated);
+        showNotification("Consultation history log deleted.");
+      }).catch(err => console.error("Failed to delete quiz:", err));
     }
   };
 
   const handleClearAllQuizzes = () => {
-    if (window.confirm("Permanently clear all scent consultations history logs?")) {
-      setQuizHistory([]);
-      localStorage.removeItem('maison_quiz_history');
-      showNotification("Consultations log database wiped.");
+    if (window.confirm("Are you sure you want to clear ALL consultation logs? This cannot be undone.")) {
+      fetch(import.meta.env.VITE_API_URL + '/quizzes/', {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('maison_token')}`
+        }
+      }).then(() => {
+        setQuizHistory([]);
+        showNotification("Consultations log database wiped.");
+      }).catch(err => console.error("Failed to clear quizzes:", err));
     }
   };
 
@@ -559,6 +687,7 @@ export const AdminRoute: React.FC = () => {
             { id: 'promos', label: 'Promotions', count: promos.length, icon: Tag },
             { id: 'orders', label: 'Orders', count: orders.length, icon: ShoppingBag },
             { id: 'consultations', label: 'Consultations', count: quizHistory.length, icon: Sparkles },
+            { id: 'lookups', label: 'Master Data', icon: Database },
             { id: 'account', label: 'Account Profile', icon: User }
           ].map(tab => {
             const Icon = tab.icon;
@@ -644,7 +773,7 @@ export const AdminRoute: React.FC = () => {
                'Administrator Settings'}
             </span>
             <h1 className="font-serif text-3xl md:text-5xl font-light text-foreground tracking-tight">
-              {activeTab === 'dashboard' ? "L'Atelier d'Éternel" : 
+              {activeTab === 'dashboard' ? "Arutala Admin" : 
                activeTab === 'analytics' ? 'Analytics Dashboard' : 
                activeTab === 'inventory' ? 'Inventory Management' : 
                activeTab === 'customers' ? 'Client Registry' : 
@@ -700,28 +829,33 @@ export const AdminRoute: React.FC = () => {
 
 
         {/* Global Notifications Toast */}
-        <AnimatePresence>
-          {notification && (
-            <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              className={`p-4 border text-xs font-sans tracking-wide flex items-center justify-between ${
-                notification.type === 'success' 
-                  ? 'bg-emerald-50/90 border-emerald-200 text-emerald-800' 
-                  : 'bg-rose-50/90 border-rose-200 text-rose-800'
-              }`}
-            >
-              <div className="flex items-center gap-2">
-                <Check size={14} />
-                <span>{notification.text}</span>
-              </div>
-              <button onClick={() => setNotification(null)} className="opacity-60 hover:opacity-100">
-                <X size={14} />
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        {typeof document !== 'undefined' ? createPortal(
+          <div className="fixed top-6 right-6 z-[9999] pointer-events-none">
+            <AnimatePresence>
+              {notification && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                  className={`p-4 border text-xs font-sans tracking-wide flex items-center justify-between shadow-xl min-w-[300px] pointer-events-auto ${
+                    notification.type === 'success' 
+                      ? 'bg-emerald-50/90 border-emerald-200 text-emerald-800 backdrop-blur-sm' 
+                      : 'bg-rose-50/90 border-rose-200 text-rose-800 backdrop-blur-sm'
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <Check size={16} />
+                    <span>{notification.text}</span>
+                  </div>
+                  <button onClick={() => setNotification(null)} className="opacity-60 hover:opacity-100 cursor-pointer">
+                    <X size={16} />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>,
+          document.body
+        ) : null}
 
         {/* Dynamic High Level Business Metrics Cards */}
         {activeTab === 'dashboard' && (
@@ -788,6 +922,7 @@ export const AdminRoute: React.FC = () => {
           {activeTab === 'analytics' && <AdminAnalytics />}
           {activeTab === 'customers' && <AdminCustomers />}
           {activeTab === 'inventory' && <AdminInventory />}
+          {activeTab === 'lookups' && <AdminLookups />}
           {activeTab === 'account' && <AdminProfile />}
           
           {/* TAB 1: Fragrances Catalog */}
@@ -909,6 +1044,36 @@ export const AdminRoute: React.FC = () => {
           {activeTab === 'orders' && (
             <div className="space-y-6">
               
+              <div className="flex justify-between items-center bg-background border border-cream px-6 py-4">
+                <div>
+                  <h2 className="font-serif text-lg text-foreground">Filter Orders</h2>
+                </div>
+                <div className="flex gap-4">
+                  <select
+                    value={paymentFilter}
+                    onChange={(e) => setPaymentFilter(e.target.value)}
+                    className="border border-cream bg-transparent px-4 py-2 text-xs font-mono focus:outline-none focus:border-accent-gold cursor-pointer"
+                  >
+                    <option value="All">All Payments</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Settlement">Settlement</option>
+                    <option value="Expire">Expire</option>
+                    <option value="Cancel">Cancel</option>
+                  </select>
+                  <select
+                    value={orderFilter}
+                    onChange={(e) => setOrderFilter(e.target.value)}
+                    className="border border-cream bg-transparent px-4 py-2 text-xs font-mono focus:outline-none focus:border-accent-gold cursor-pointer"
+                  >
+                    <option value="All">All Statuses</option>
+                    <option value="Processing">Processing</option>
+                    <option value="Shipped">Shipped</option>
+                    <option value="Delivered">Delivered</option>
+                    <option value="Cancelled">Cancelled</option>
+                  </select>
+                </div>
+              </div>
+
               <div className="bg-background border border-cream overflow-hidden">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left border-collapse">
@@ -924,8 +1089,12 @@ export const AdminRoute: React.FC = () => {
                     </thead>
                     <tbody className="divide-y divide-cream text-xs font-sans text-foreground/70">
                       {(() => {
-                        const totalOrdersPages = Math.ceil(orders.length / ITEMS_PER_PAGE);
-                        const paginatedOrders = orders.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+                        const filteredOrders = orders.filter(o => 
+                          (orderFilter === 'All' || o.status === orderFilter) && 
+                          (paymentFilter === 'All' || o.payment_status === paymentFilter)
+                        );
+                        const totalOrdersPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
+                        const paginatedOrders = filteredOrders.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
                         
                         return (
                           <>
@@ -934,7 +1103,9 @@ export const AdminRoute: React.FC = () => {
                           
                           {/* Order metadata */}
                           <td className="px-6 py-4 space-y-1">
-                            <span className="font-mono text-sm font-semibold text-foreground">{order.id}</span>
+                            <span className="font-mono text-sm font-semibold text-foreground">
+                              {order.order_ref || `#${order.id}`}
+                            </span>
                             <p className="text-[10px] text-foreground/40 flex items-center gap-1">
                               <Calendar size={10} />
                               {new Date(order.date).toLocaleDateString('id-ID', {
@@ -944,6 +1115,12 @@ export const AdminRoute: React.FC = () => {
                                 hour: '2-digit',
                                 minute: '2-digit'
                               })}
+                            </p>
+                            <p className="text-[9px] uppercase tracking-widest text-foreground/60">
+                              Payment: 
+                              <span className={`ml-1 font-bold ${order.payment_status === 'Paid' || order.payment_status === 'Settlement' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                                {order.payment_status}
+                              </span>
                             </p>
                           </td>
 
@@ -967,8 +1144,8 @@ export const AdminRoute: React.FC = () => {
                           <td className="px-6 py-4">
                             <div className="space-y-1.5 max-w-[250px]">
                               {order.items.map((item, idx) => {
-                                const matchedProduct = products.find(p => p.slug === item.productSlug);
-                                const imageSrc = matchedProduct ? matchedProduct.images.primary : item.productImage;
+                                const matchedProduct = products.find(p => p.slug === item.product_slug);
+                                const imageSrc = matchedProduct ? matchedProduct.images.primary : null;
                                 
                                 return (
                                   <div key={idx} className="flex items-center gap-2">
@@ -980,7 +1157,7 @@ export const AdminRoute: React.FC = () => {
                                       )}
                                     </div>
                                     <p className="text-[11px] font-medium text-foreground truncate flex-grow">
-                                      {item.productName} 
+                                      {item.product_name} 
                                       <span className="text-foreground/40 pl-1 font-mono font-normal">x{item.quantity}</span>
                                     </p>
                                   </div>
@@ -994,28 +1171,54 @@ export const AdminRoute: React.FC = () => {
                             {formatRupiah(order.total)}
                           </td>
 
-                          {/* Status */}
+                          {/* Status & Tracking */}
                           <td className="px-6 py-4">
-                            <div className="flex flex-col gap-1">
-                              <span className={`inline-flex px-2 py-0.5 text-[9px] uppercase tracking-widest font-bold border rounded-none w-max ${
-                                order.status === 'Processing' ? 'bg-blue-50 border-blue-200 text-blue-700' :
-                                order.status === 'Shipped' ? 'bg-amber-50 border-amber-200 text-amber-700' :
-                                order.status === 'Delivered' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
-                                'bg-rose-50 border-rose-200 text-rose-700'
-                              }`}>
-                                {order.status}
-                              </span>
-                              
-                              <select 
-                                value={order.status}
-                                onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value as any)}
-                                className="bg-transparent border border-foreground/10 text-[9px] uppercase tracking-wider px-1 py-0.5 outline-none font-sans font-medium hover:border-foreground/40 cursor-pointer mt-1"
-                              >
-                                <option value="Processing">Processing</option>
-                                <option value="Shipped">Shipped</option>
-                                <option value="Delivered">Delivered</option>
-                                <option value="Cancelled">Cancelled</option>
-                              </select>
+                            <div className="flex flex-col gap-2">
+                              <div className="flex items-center gap-2">
+                                <span className={`inline-flex px-2 py-0.5 text-[9px] uppercase tracking-widest font-bold border rounded-none w-max ${
+                                  order.status === 'Processing' ? 'bg-blue-50 border-blue-200 text-blue-700' :
+                                  order.status === 'Shipped' ? 'bg-amber-50 border-amber-200 text-amber-700' :
+                                  order.status === 'Delivered' ? 'bg-emerald-50 border-emerald-200 text-emerald-700' :
+                                  'bg-rose-50 border-rose-200 text-rose-700'
+                                }`}>
+                                  {order.status}
+                                </span>
+                                <select 
+                                  value={order.status}
+                                  onChange={(e) => handleUpdateOrderStatus(order.id, e.target.value as any)}
+                                  className="bg-transparent border border-foreground/10 text-[9px] uppercase tracking-wider px-1 py-0.5 outline-none font-sans font-medium hover:border-foreground/40 cursor-pointer"
+                                >
+                                  <option value="Processing">Processing</option>
+                                  <option value="Shipped">Shipped</option>
+                                  <option value="Delivered">Delivered</option>
+                                  <option value="Cancelled">Cancelled</option>
+                                </select>
+                              </div>
+
+                              {/* Tracking Number Input */}
+                              {(order.payment_status === 'Paid' || order.payment_status === 'Settlement') && order.status !== 'Cancelled' && (
+                                <div className="mt-2 space-y-1">
+                                  <p className="text-[9px] uppercase tracking-widest text-foreground/50">Tracking Resi</p>
+                                  <div className="flex items-center gap-1">
+                                    <input 
+                                      type="text" 
+                                      id={`tracking-${order.id}`}
+                                      defaultValue={order.tracking_number || ''}
+                                      placeholder="JNE123456789"
+                                      className="border border-cream bg-transparent px-2 py-1 text-xs font-mono w-28 focus:outline-none focus:border-accent-gold"
+                                    />
+                                    <button 
+                                      onClick={() => {
+                                        const el = document.getElementById(`tracking-${order.id}`) as HTMLInputElement;
+                                        if (el) handleSaveTrackingNumber(order.id, el.value);
+                                      }}
+                                      className="bg-foreground text-cream px-2 py-1 text-[9px] uppercase tracking-wider hover:bg-accent-gold transition-colors"
+                                    >
+                                      Save
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
                             </div>
                           </td>
 
@@ -1050,25 +1253,31 @@ export const AdminRoute: React.FC = () => {
               </div>
               
               {/* Pagination Controls for Orders */}
-              {Math.ceil(orders.length / ITEMS_PER_PAGE) > 1 && (
-                <div className="flex justify-center items-center gap-4 mt-8 pt-4 border-t border-cream">
-                  <button 
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    className="p-2 border border-cream disabled:opacity-30 disabled:cursor-not-allowed hover:bg-muted transition-colors cursor-pointer"
-                  >
-                    &lt;
-                  </button>
-                  <span className="text-xs font-mono text-foreground/60">Page {currentPage} of {Math.ceil(orders.length / ITEMS_PER_PAGE)}</span>
-                  <button 
-                    onClick={() => setCurrentPage(p => Math.min(Math.ceil(orders.length / ITEMS_PER_PAGE), p + 1))}
-                    disabled={currentPage === Math.ceil(orders.length / ITEMS_PER_PAGE)}
-                    className="p-2 border border-cream disabled:opacity-30 disabled:cursor-not-allowed hover:bg-muted transition-colors cursor-pointer"
-                  >
-                    &gt;
-                  </button>
-                </div>
-              )}
+              {(() => {
+                const filteredOrders = orders.filter(o => 
+                  (orderFilter === 'All' || o.status === orderFilter) && 
+                  (paymentFilter === 'All' || o.payment_status === paymentFilter)
+                );
+                return Math.ceil(filteredOrders.length / ITEMS_PER_PAGE) > 1 && (
+                  <div className="flex justify-center items-center gap-4 mt-8 pt-4 border-t border-cream">
+                    <button 
+                      onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className="p-2 border border-cream disabled:opacity-30 disabled:cursor-not-allowed hover:bg-muted transition-colors cursor-pointer"
+                    >
+                      &lt;
+                    </button>
+                    <span className="text-xs font-mono text-foreground/60">Page {currentPage} of {Math.ceil(filteredOrders.length / ITEMS_PER_PAGE)}</span>
+                    <button 
+                      onClick={() => setCurrentPage(p => Math.min(Math.ceil(filteredOrders.length / ITEMS_PER_PAGE), p + 1))}
+                      disabled={currentPage === Math.ceil(filteredOrders.length / ITEMS_PER_PAGE)}
+                      className="p-2 border border-cream disabled:opacity-30 disabled:cursor-not-allowed hover:bg-muted transition-colors cursor-pointer"
+                    >
+                      &gt;
+                    </button>
+                  </div>
+                );
+              })()}
             </div>
           )}
 
@@ -1116,28 +1325,28 @@ export const AdminRoute: React.FC = () => {
                             </div>
 
                             {/* Answers Map */}
-                            <div className="space-y-2 text-xs">
-                              {quiz.answers.map((ans, idx) => (
-                                <div key={idx} className="space-y-0.5 bg-gray-50/50 p-2 border-l-2 border-foreground/10">
-                                  <p className="text-[10px] text-foreground/40 font-medium font-sans uppercase tracking-wider">{ans.question}</p>
-                                  <p className="font-serif font-medium text-foreground">{ans.answer}</p>
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                              {Object.entries(quiz.answers).map(([question, answer], idx) => (
+                                <div key={idx} className="bg-foreground/5 p-3">
+                                  <span className="block text-[8px] tracking-widest uppercase font-sans text-gray-400 mb-1">{question}</span>
+                                  <p className="font-serif italic text-xs text-foreground/80">"{answer}"</p>
                                 </div>
                               ))}
                             </div>
-                          </div>
-
-                          {/* Recommendation Result Display */}
-                          <div className="mt-6 pt-4 border-t border-cream flex items-center justify-between bg-amber-50/30 -mx-6 -mb-6 p-4 border-b border-r border-l">
-                            <div className="space-y-0.5">
-                              <span className="block text-[8px] uppercase tracking-widest text-foreground/40 font-sans">Matching Masterwork</span>
-                              <span className="font-serif font-semibold text-foreground text-sm">{quiz.recommendedName}</span>
+                            
+                            <div className="flex items-center justify-between border-t border-foreground/5 pt-4">
+                              <span className="text-[9px] tracking-[0.2em] uppercase font-sans font-semibold text-accent-gold">Matched Signature</span>
+                              <span className="font-serif font-semibold text-foreground text-sm uppercase">{quiz.recommendedProductSlug}</span>
                             </div>
-                            <button
-                              onClick={() => { window.location.hash = `#/product/${quiz.recommendedSlug}`; }}
-                              className="text-[10px] uppercase font-sans font-semibold tracking-wider text-foreground hover:underline border border-foreground/10 px-2.5 py-1 bg-background"
-                            >
-                              View Scent
-                            </button>
+                            
+                            <div className="flex justify-end pt-2">
+                              <button
+                                onClick={() => { window.location.hash = `#/product/${quiz.recommendedProductSlug}`; }}
+                                className="text-[10px] uppercase font-sans font-semibold tracking-wider text-foreground hover:underline border border-foreground/10 px-2.5 py-1 bg-background"
+                              >
+                                View Scent
+                              </button>
+                            </div>
                           </div>
 
                           {/* Delete single log button floating */}
@@ -1198,13 +1407,6 @@ export const AdminRoute: React.FC = () => {
                 <span className="text-[10px] tracking-widest uppercase font-semibold text-foreground/40 font-sans">
                   Quantity-Based Promotions List
                 </span>
-                <button
-                  onClick={handleOpenAddPromoForm}
-                  className="px-4 py-2 bg-foreground text-cream text-[10px] tracking-widest uppercase font-sans font-medium hover:bg-foreground/90 transition-all duration-300 flex items-center gap-2 shadow-sm"
-                >
-                  <Plus size={12} />
-                  Add New Promo
-                </button>
               </div>
 
               {/* Table List of Promos */}
@@ -1234,7 +1436,7 @@ export const AdminRoute: React.FC = () => {
                                 <td className="px-6 py-4 space-y-1">
                                   <div className="flex items-center gap-2">
                                     {promo.code ? (
-                                      <span className="font-mono text-xs font-bold text-foreground bg-amber-50 border border-amber-200/60 px-2 py-0.5">
+                                      <span className="font-mono text-xs font-bold text-amber-900 bg-amber-50 border border-amber-200/60 px-2 py-0.5">
                                         {promo.code}
                                       </span>
                                     ) : (
@@ -1348,7 +1550,9 @@ export const AdminRoute: React.FC = () => {
       </main>
 
       {/* Slide-out Panel Form (for Add/Edit Products) */}
-      <AnimatePresence>
+      {typeof document !== 'undefined' ? createPortal(
+        <>
+          <AnimatePresence>
         {isFormOpen && (
           <motion.div
             key="backdrop"
@@ -1449,25 +1653,31 @@ export const AdminRoute: React.FC = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase tracking-wider text-foreground/40 font-semibold">Concentration</label>
-                      <input
-                        type="text"
+                      <select
                         required
                         value={formData.concentration}
                         onChange={(e) => setFormData({ ...formData, concentration: e.target.value })}
-                        placeholder="Eau de Parfum"
                         className="w-full border border-cream px-3 py-2 focus:border-foreground focus:outline-none transition-colors bg-transparent rounded-none text-foreground"
-                      />
+                      >
+                        <option value="" disabled>Select Concentration</option>
+                        {lookupConcentrations.map(c => (
+                          <option key={c.id} value={c.name}>{c.name}</option>
+                        ))}
+                      </select>
                     </div>
                     <div className="space-y-1">
                       <label className="text-[10px] uppercase tracking-wider text-foreground/40 font-semibold">Volume Display</label>
-                      <input
-                        type="text"
+                      <select
                         required
                         value={formData.volume}
                         onChange={(e) => setFormData({ ...formData, volume: e.target.value })}
-                        placeholder="100ml / 3.4 FL.OZ"
                         className="w-full border border-cream px-3 py-2 focus:border-foreground focus:outline-none transition-colors bg-transparent rounded-none text-foreground"
-                      />
+                      >
+                        <option value="" disabled>Select Volume</option>
+                        {lookupVolumes.map(v => (
+                          <option key={v.id} value={v.name}>{v.name}</option>
+                        ))}
+                      </select>
                     </div>
                   </div>
 
@@ -1678,7 +1888,7 @@ export const AdminRoute: React.FC = () => {
                           className="w-full bg-background border border-cream px-3 py-2 focus:border-foreground focus:outline-none text-foreground"
                         />
                       </div>
-                      <div className="space-y-3 col-span-2 pt-2 border-t border-cream">
+                      <div className="space-y-3 pt-2 border-t border-cream">
                         <label className="text-[10px] uppercase tracking-wider text-foreground/80 font-semibold font-sans block">Visibility Settings</label>
                         <div className="flex flex-col gap-3">
                           <label className="flex items-center gap-3 cursor-pointer">
@@ -1702,7 +1912,6 @@ export const AdminRoute: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                </div>
                 </div>
 
                 {/* Submission Row */}
@@ -1881,6 +2090,7 @@ export const AdminRoute: React.FC = () => {
             </motion.div>
         )}
       </AnimatePresence>
+      </>, document.body) : null}
 
     </div>
   );

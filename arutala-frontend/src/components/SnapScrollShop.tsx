@@ -56,8 +56,11 @@ export const SnapScrollShop: React.FC<SnapScrollShopProps> = ({
     >
       {/* Slide 0: The Intro Slide */}
       {showIntro && (
-        <section className="h-[100dvh] w-full snap-start snap-always flex flex-col items-center justify-center relative bg-cream/5 px-6 pt-20 pb-10">
-          <div className="max-w-2xl text-center space-y-6">
+        <section className="h-[100dvh] w-full snap-start snap-always flex flex-col items-center justify-center relative bg-cream/5 px-6 pt-20 pb-10 overflow-hidden">
+          {/* Subtle background glow */}
+          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-accent-gold/5 rounded-full blur-[100px] pointer-events-none" />
+          
+          <div className="max-w-2xl text-center space-y-6 relative z-10">
             <p className="text-[10px] tracking-[0.4em] uppercase font-sans font-medium text-foreground/40">
               Cabinet d'Odeurs
             </p>

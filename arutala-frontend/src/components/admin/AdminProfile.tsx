@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../../context/auth-context';
 import { useToast } from '../../context/toast-context';
+import { LogOut } from 'lucide-react';
 
 export const AdminProfile: React.FC = () => {
-  const { user, token, fetchUser } = useAuth();
+  const { user, token, fetchUser, logout } = useAuth();
   const { addToast } = useToast();
 
   const [profileForm, setProfileForm] = useState({ name: '' });
@@ -90,6 +91,18 @@ export const AdminProfile: React.FC = () => {
             Update Password
           </button>
         </form>
+      </div>
+      <div className="pt-8 border-t border-cream">
+        <button 
+          onClick={() => {
+            logout();
+            window.location.hash = '#/login';
+          }} 
+          className="px-6 py-3 border border-foreground/20 text-foreground/70 bg-transparent text-[10px] uppercase tracking-widest font-sans font-medium hover:text-red-500 hover:border-red-500/50 transition-colors cursor-pointer flex items-center justify-center gap-3 w-max"
+        >
+          <LogOut size={14} />
+          <span>Sign Out</span>
+        </button>
       </div>
     </div>
   );

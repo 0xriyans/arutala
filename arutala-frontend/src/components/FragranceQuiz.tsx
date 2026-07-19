@@ -181,29 +181,29 @@ export const FragranceQuiz: React.FC = () => {
         }
       });
 
-      const matchedProduct = products.find((p) => p.slug === bestSlug) || products[0];
-      setRecommendedProduct(matchedProduct);
+      const topPick = products.find((p) => p.slug === bestSlug) || products[0];
+      setRecommendedProduct(topPick);
 
       // Log Scent Quiz completion for Admin Panel
       try {
         const quizLog = {
-          id: 'QZ-' + Math.floor(100000 + Math.random() * 900000),
-          date: new Date().toISOString(),
-          answers: newAnswers.map((optIdx, qIdx) => {
-            return {
-              question: quizQuestions[qIdx].text,
-              answer: quizQuestions[qIdx].options[optIdx].text
-            };
-          }),
-          recommendedName: matchedProduct.name,
-          recommendedSlug: matchedProduct.slug
+          answers: Object.fromEntries(
+            Object.entries(newAnswers).map(([qIdx, ansIdx]) => [
+              quizQuestions[Number(qIdx)].text,
+              quizQuestions[Number(qIdx)].options[Number(ansIdx)].text
+            ])
+          ),
+          recommendedProductSlug: topPick.slug
         };
-        const stored = localStorage.getItem('maison_quiz_history');
-        const history = stored ? JSON.parse(stored) : [];
-        history.unshift(quizLog);
-        localStorage.setItem('maison_quiz_history', JSON.stringify(history));
+        fetch(import.meta.env.VITE_API_URL + '/quizzes/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(quizLog)
+        }).catch(err => console.error("Failed to log quiz:", err));
       } catch (err) {
-        console.error('Failed to log quiz', err);
+        console.error("Error preparing quiz log:", err);
       }
 
       setCurrentStep(5); // Show result page
@@ -233,8 +233,7 @@ export const FragranceQuiz: React.FC = () => {
   const handleAddToCart = () => {
     if (recommendedProduct) {
       addToCart(recommendedProduct);
-      setAddedToCartNotification(true);
-      setTimeout(() => setAddedToCartNotification(false), 2500);
+      closeQuiz();
     }
   };
 
@@ -249,7 +248,7 @@ export const FragranceQuiz: React.FC = () => {
   return (
     <>
       {/* 1. Elegant Inline CTA Card integrated into the HomeRoute */}
-      <section className="bg-muted border-t border-b border-cream py-24 md:py-28" id="scent-finder-consultation">
+      <section className="bg-background border-t border-b border-foreground/10 py-24 md:py-28" id="scent-finder-consultation">
         <div className="max-w-4xl mx-auto px-6 text-center space-y-8">
           <div className="flex justify-center">
             <div className="w-10 h-10 rounded-full bg-accent-gold/5 border border-accent-gold/20 flex items-center justify-center text-accent-gold animate-pulse">
