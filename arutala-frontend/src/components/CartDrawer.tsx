@@ -1,9 +1,49 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Plus, Minus, Trash2, ShoppingBag, CreditCard, CheckCircle2, Tag } from 'lucide-react';
+import { X, Plus, Minus, Trash2, ShoppingBag, CreditCard, CheckCircle2, Tag, Truck, Loader2 } from 'lucide-react';
 import { useCart } from '../context/cart-context';
 import { ProgressiveImage } from './ProgressiveImage';
 import { formatRupiah } from '../data/products';
+import { useAuth } from '../context/auth-context';
+
+// TypeScript declarations for Midtrans Snap
+declare global {
+  interface Window {
+    snap: {
+      pay: (token: string, options: {
+        onSuccess?: (result: any) => void;
+        onPending?: (result: any) => void;
+        onError?: (result: any) => void;
+        onClose?: () => void;
+      }) => void;
+      embed: (token: string, options: {
+        embedId: string;
+        onSuccess?: (result: any) => void;
+        onPending?: (result: any) => void;
+        onError?: (result: any) => void;
+      }) => void;
+      hide: () => void;
+    };
+  }
+}
+
+interface Province {
+  province_id: string;
+  province: string;
+}
+
+interface City {
+  city_id: string;
+  city_name: string;
+  type: string;
+  postal_code: string;
+}
+
+interface ShippingService {
+  service: string;
+  description: string;
+  cost: { value: number; etd: string; note: string }[];
+}
 
 export const CartDrawer: React.FC = () => {
   const {
@@ -20,6 +60,7 @@ export const CartDrawer: React.FC = () => {
     promoDiscount,
     cartFinalTotal,
     activePromosApplied,
+    addToCart,
   } = useCart();
 
   const [checkoutStep, setCheckoutStep] = useState<'cart' | 'shipping' | 'success'>('cart');
@@ -27,10 +68,41 @@ export const CartDrawer: React.FC = () => {
   const [shippingForm, setShippingForm] = useState({
     name: '',
     email: '',
+    recipientName: '',
+    phone: '',
     address: '',
     city: '',
     postalCode: '',
   });
+
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user) {
+      setShippingForm(prev => ({
+        ...prev,
+        name: user.name || prev.name,
+        email: user.email || prev.email,
+        recipientName: prev.recipientName || user.name || prev.name,
+        phone: (user as any).phone || prev.phone,
+        address: (user as any).address || prev.address,
+        postalCode: (user as any).postalCode || prev.postalCode,
+      }));
+    }
+  }, [user]);
+
+  // RajaOngkir state
+  const [provinces, setProvinces] = useState<Province[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
+  const [selectedProvinceId, setSelectedProvinceId] = useState('');
+  const [selectedCityId, setSelectedCityId] = useState('');
+  const [shippingServices, setShippingServices] = useState<ShippingService[]>([]);
+  const [selectedShippingCost, setSelectedShippingCost] = useState(0);
+  const [selectedShippingLabel, setSelectedShippingLabel] = useState('');
+  const [loadingProvinces, setLoadingProvinces] = useState(false);
+  const [loadingCities, setLoadingCities] = useState(false);
+  const [loadingShipping, setLoadingShipping] = useState(false);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
 
   const [promoInput, setPromoInput] = useState('');
   const [promoError, setPromoError] = useState<string | null>(null);
@@ -79,50 +151,135 @@ export const CartDrawer: React.FC = () => {
     }
   }, [isOpen]);
 
+  // Fetch provinces on mount
+  useEffect(() => {
+    const fetchProvinces = async () => {
+      setLoadingProvinces(true);
+      try {
+        const res = await fetch('/api/shipping/provinces');
+        const data = await res.json();
+        if (data?.rajaongkir?.results) {
+          setProvinces(data.rajaongkir.results);
+        }
+      } catch (err) { console.error('Failed to fetch provinces', err); }
+      setLoadingProvinces(false);
+    };
+    fetchProvinces();
+  }, []);
+
+  // Fetch cities when province changes
+  useEffect(() => {
+    if (!selectedProvinceId) { setCities([]); return; }
+    const fetchCities = async () => {
+      setLoadingCities(true);
+      setSelectedCityId('');
+      setCities([]);
+      setShippingServices([]);
+      setSelectedShippingCost(0);
+      setSelectedShippingLabel('');
+      try {
+        const res = await fetch(`/api/shipping/cities?province_id=${selectedProvinceId}`);
+        const data = await res.json();
+        if (data?.rajaongkir?.results) {
+          setCities(data.rajaongkir.results);
+        }
+      } catch (err) { console.error('Failed to fetch cities', err); }
+      setLoadingCities(false);
+    };
+    fetchCities();
+  }, [selectedProvinceId]);
+
+  // Fetch shipping cost when city changes
+  useEffect(() => {
+    if (!selectedCityId) { setShippingServices([]); setSelectedShippingCost(0); return; }
+    const totalWeight = cartItems.reduce((sum, item) => sum + item.quantity * 400, 0); // 400g per bottle
+    const fetchCost = async () => {
+      setLoadingShipping(true);
+      try {
+        const res = await fetch('/api/shipping/cost', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ destination_city_id: selectedCityId, weight_grams: totalWeight, courier: 'jne' })
+        });
+        const data = await res.json();
+        if (data?.rajaongkir?.results?.[0]?.costs) {
+          setShippingServices(data.rajaongkir.results[0].costs);
+          // Auto-select first
+          const first = data.rajaongkir.results[0].costs[0];
+          if (first) {
+            setSelectedShippingCost(first.cost[0].value);
+            setSelectedShippingLabel(`JNE ${first.service} (${first.cost[0].etd} hari)`);
+          }
+        }
+      } catch (err) { console.error('Failed to fetch shipping cost', err); }
+      setLoadingShipping(false);
+    };
+    fetchCost();
+  }, [selectedCityId, cartItems]);
+
   const handleCheckoutSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (shippingForm.name && shippingForm.email && shippingForm.address) {
-      const payload = {
-        customer_name: shippingForm.name,
-        customer_email: shippingForm.email,
-        customer_address: shippingForm.address,
-        customer_city: shippingForm.city,
-        customer_postalCode: shippingForm.postalCode,
-        shipping_cost: 0,
-        shipping_courier: "Standard",
-        items: cartItems.map(item => ({
-          productSlug: item.product.slug,
-          productName: item.product.name,
-          quantity: item.quantity,
-          price: item.product.price
-        })),
-        total: cartFinalTotal
-      };
+    if (!shippingForm.name || !shippingForm.email || !shippingForm.address || !selectedCityId || !shippingForm.recipientName) return;
+    setIsProcessingPayment(true);
 
-      try {
-        const token = localStorage.getItem('arutala_token');
-        const res = await fetch('/api/orders/', {
-          method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json',
-            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-          },
-          body: JSON.stringify(payload)
-        });
+    const selectedCityObj = cities.find(c => c.city_id === selectedCityId);
+    const cityName = selectedCityObj ? `${selectedCityObj.type} ${selectedCityObj.city_name}` : shippingForm.city;
+    const finalTotal = cartFinalTotal + selectedShippingCost;
 
-        if (res.ok) {
-          const orderData = await res.json();
-          // Midtrans token or DB ID
-          setCompletedOrderId(orderData.id || "ORDER_SUCCESS");
-          setCheckoutStep('success');
-        } else {
-          const errData = await res.json();
-          console.error("Order failed", errData);
-          alert("Order failed: " + (errData.detail || "Please make sure you are logged in."));
-        }
-      } catch (err) {
-        console.error('Failed to log order', err);
+    // 1. Create order in backend
+    const orderPayload = {
+      customer_name: shippingForm.recipientName || shippingForm.name,
+      customer_email: shippingForm.email,
+      customer_address: shippingForm.address,
+      customer_city: cityName,
+      customer_postalCode: shippingForm.postalCode,
+      shipping_cost: selectedShippingCost,
+      shipping_courier: selectedShippingLabel || 'JNE',
+      items: cartItems.map(item => ({
+        productSlug: item.product.slug,
+        productName: item.product.name,
+        quantity: item.quantity,
+        price: item.product.price
+      })),
+      total: finalTotal
+    };
+
+    try {
+      const authToken = localStorage.getItem('arutala_token');
+      const orderRes = await fetch('/api/orders/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(authToken ? { 'Authorization': `Bearer ${authToken}` } : {})
+        },
+        body: JSON.stringify(orderPayload)
+      });
+
+      if (!orderRes.ok) {
+        const errData = await orderRes.json();
+        alert('Order failed: ' + (errData.detail || 'Please make sure you are logged in.'));
+        setIsProcessingPayment(false);
+        return;
       }
+
+      const orderData = await orderRes.json();
+      const orderId = String(orderData.id);
+
+      if (!orderData.payment_token) {
+        alert('Payment initialization failed. Missing token from server.');
+        setIsProcessingPayment(false);
+        return;
+      }
+
+      // 3. Redirect to payment page
+      setIsProcessingPayment(false);
+      closeCart();
+      window.location.hash = `#/payment?token=${orderData.payment_token}&order_id=${orderData.order_ref}`;
+
+    } catch (err) {
+      console.error('Checkout failed', err);
+      alert('An error occurred during checkout. Please try again.');
+      setIsProcessingPayment(false);
     }
   };
 
@@ -197,6 +354,22 @@ export const CartDrawer: React.FC = () => {
                     </div>
                   ) : (
                     <div className="space-y-6">
+                      
+                      {/* Smart Cart Free Shipping Progress Bar */}
+                      <div className="space-y-3 pb-2 pt-2">
+                        <p className="text-[9px] tracking-widest uppercase font-sans font-semibold text-foreground/80 text-center">
+                          {cartFinalTotal >= 1500000 
+                            ? "You have unlocked Complimentary Standard Shipping"
+                            : `You are ${formatRupiah(1500000 - cartFinalTotal)} away from Complimentary Standard Shipping`}
+                        </p>
+                        <div className="w-full h-[2px] bg-cream/20 overflow-hidden">
+                          <div 
+                            className="h-full bg-accent-gold transition-all duration-1000 ease-out" 
+                            style={{ width: `${Math.min((cartFinalTotal / 1500000) * 100, 100)}%` }} 
+                          />
+                        </div>
+                      </div>
+
                       <AnimatePresence initial={false}>
                         {cartItems.map((item) => (
                           <motion.div
@@ -395,94 +568,175 @@ export const CartDrawer: React.FC = () => {
               )}
 
               {checkoutStep === 'shipping' && (
-                <form onSubmit={handleCheckoutSubmit} className="space-y-6 py-2">
+                <form onSubmit={handleCheckoutSubmit} className="space-y-5 py-2">
                   <p className="text-xs font-sans text-foreground/50 leading-relaxed">
-                    Complete your shipping details below to place your order. Enjoy complimentary standard shipping and signature gift wrapping.
+                    Complete your details below. Shipping cost is calculated automatically via JNE.
                   </p>
                   
                   <div className="space-y-4">
+                    {/* Full Name */}
                     <div className="space-y-1">
-                      <label className="text-[10px] tracking-wider uppercase font-sans text-foreground/50 font-medium">Full Name</label>
-                      <input
-                        type="text"
-                        required
-                        value={shippingForm.name}
+                      <div className="flex justify-between items-center">
+                        <label className="text-[10px] tracking-wider uppercase font-sans text-foreground/50 font-medium">Full Name</label>
+                        {user && <a href="#/profile" onClick={closeCart} className="text-[10px] text-accent-gold hover:underline">Edit in Profile</a>}
+                      </div>
+                      <input type="text" required value={shippingForm.name} disabled={!!user}
                         onChange={(e) => setShippingForm({ ...shippingForm, name: e.target.value })}
-                        placeholder="Jean-Baptiste Grenouille"
-                        className="w-full border border-cream px-4 py-3 text-xs font-sans focus:border-foreground focus:outline-none transition-colors bg-transparent rounded-none"
-                      />
+                        placeholder="Nama lengkap"
+                        className="w-full border border-cream px-4 py-3 text-xs font-sans focus:border-foreground focus:outline-none transition-colors bg-transparent rounded-none disabled:opacity-50 disabled:cursor-not-allowed" />
                     </div>
+                    {/* Email */}
                     <div className="space-y-1">
-                      <label className="text-[10px] tracking-wider uppercase font-sans text-foreground/50 font-medium">Email Address</label>
-                      <input
-                        type="email"
-                        required
-                        value={shippingForm.email}
+                      <div className="flex justify-between items-center">
+                        <label className="text-[10px] tracking-wider uppercase font-sans text-foreground/50 font-medium">Email Address</label>
+                        {user && <a href="#/profile" onClick={closeCart} className="text-[10px] text-accent-gold hover:underline">Edit in Profile</a>}
+                      </div>
+                      <input type="email" required value={shippingForm.email} disabled={!!user}
                         onChange={(e) => setShippingForm({ ...shippingForm, email: e.target.value })}
-                        placeholder="customer@arutala.com"
-                        className="w-full border border-cream px-4 py-3 text-xs font-sans focus:border-foreground focus:outline-none transition-colors bg-transparent rounded-none"
-                      />
+                        placeholder="email@example.com"
+                        className="w-full border border-cream px-4 py-3 text-xs font-sans focus:border-foreground focus:outline-none transition-colors bg-transparent rounded-none disabled:opacity-50 disabled:cursor-not-allowed" />
                     </div>
+                    {/* Phone */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] tracking-wider uppercase font-sans text-foreground/50 font-medium">Phone Number</label>
+                      <input type="tel" required value={shippingForm.phone}
+                        onChange={(e) => setShippingForm({ ...shippingForm, phone: e.target.value })}
+                        placeholder="08xxxxxxxxxx"
+                        className="w-full border border-cream px-4 py-3 text-xs font-sans focus:border-foreground focus:outline-none transition-colors bg-transparent rounded-none" />
+                    </div>
+                    {/* Recipient Name */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] tracking-wider uppercase font-sans text-foreground/50 font-medium">Recipient Name (Nama Penerima)</label>
+                      <input type="text" required value={shippingForm.recipientName}
+                        onChange={(e) => setShippingForm({ ...shippingForm, recipientName: e.target.value })}
+                        placeholder="Nama penerima paket"
+                        className="w-full border border-cream px-4 py-3 text-xs font-sans focus:border-foreground focus:outline-none transition-colors bg-transparent rounded-none" />
+                    </div>
+                    {/* Address */}
                     <div className="space-y-1">
                       <label className="text-[10px] tracking-wider uppercase font-sans text-foreground/50 font-medium">Street Address</label>
-                      <input
-                        type="text"
-                        required
-                        value={shippingForm.address}
+                      <input type="text" required value={shippingForm.address}
                         onChange={(e) => setShippingForm({ ...shippingForm, address: e.target.value })}
-                        placeholder="18 Rue de l'Orangerie"
-                        className="w-full border border-cream px-4 py-3 text-xs font-sans focus:border-foreground focus:outline-none transition-colors bg-transparent rounded-none"
-                      />
+                        placeholder="Jl. Kenanga No. 12"
+                        className="w-full border border-cream px-4 py-3 text-xs font-sans focus:border-foreground focus:outline-none transition-colors bg-transparent rounded-none" />
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-1">
-                        <label className="text-[10px] tracking-wider uppercase font-sans text-foreground/50 font-medium">City</label>
-                        <input
-                          type="text"
-                          required
-                          value={shippingForm.city}
-                          onChange={(e) => setShippingForm({ ...shippingForm, city: e.target.value })}
-                          placeholder="Paris"
-                          className="w-full border border-cream px-4 py-3 text-xs font-sans focus:border-foreground focus:outline-none transition-colors bg-transparent rounded-none"
-                        />
+                    {/* Province */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] tracking-wider uppercase font-sans text-foreground/50 font-medium">Province</label>
+                      <div className="relative">
+                        <select required value={selectedProvinceId}
+                          onChange={(e) => setSelectedProvinceId(e.target.value)}
+                          className="w-full border border-cream px-4 py-3 text-xs font-sans focus:border-foreground focus:outline-none transition-colors bg-transparent rounded-none appearance-none cursor-pointer">
+                          <option value="">{loadingProvinces ? 'Loading...' : 'Select Province'}</option>
+                          {provinces.map(p => (
+                            <option key={p.province_id} value={p.province_id} className="text-black">{p.province}</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-foreground/40">
+                          <svg width="10" height="6" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" fill="none"/></svg>
+                        </div>
                       </div>
-                      <div className="space-y-1">
-                        <label className="text-[10px] tracking-wider uppercase font-sans text-foreground/50 font-medium">Postal Code</label>
-                        <input
-                          type="text"
-                          required
-                          value={shippingForm.postalCode}
-                          onChange={(e) => setShippingForm({ ...shippingForm, postalCode: e.target.value })}
-                          placeholder="75001"
-                          className="w-full border border-cream px-4 py-3 text-xs font-sans focus:border-foreground focus:outline-none transition-colors bg-transparent rounded-none"
-                        />
+                    </div>
+                    {/* City */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] tracking-wider uppercase font-sans text-foreground/50 font-medium">City / District</label>
+                      <div className="relative">
+                        <select required value={selectedCityId}
+                          onChange={(e) => {
+                            setSelectedCityId(e.target.value);
+                            const city = cities.find(c => c.city_id === e.target.value);
+                            if (city) {
+                              setShippingForm(prev => ({ ...prev, city: `${city.type} ${city.city_name}`, postalCode: city.postal_code }));
+                            }
+                          }}
+                          disabled={!selectedProvinceId || loadingCities}
+                          className="w-full border border-cream px-4 py-3 text-xs font-sans focus:border-foreground focus:outline-none transition-colors bg-transparent rounded-none appearance-none cursor-pointer disabled:opacity-40">
+                          <option value="">{loadingCities ? 'Loading...' : 'Select City'}</option>
+                          {cities.map(c => (
+                            <option key={c.city_id} value={c.city_id} className="text-black">{c.type} {c.city_name}</option>
+                          ))}
+                        </select>
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-foreground/40">
+                          <svg width="10" height="6" viewBox="0 0 10 6"><path d="M1 1L5 5L9 1" stroke="currentColor" strokeWidth="1.5" fill="none"/></svg>
+                        </div>
                       </div>
+                    </div>
+                    {/* Postal Code (auto-filled) */}
+                    <div className="space-y-1">
+                      <label className="text-[10px] tracking-wider uppercase font-sans text-foreground/50 font-medium">Postal Code</label>
+                      <input type="text" required value={shippingForm.postalCode}
+                        onChange={(e) => setShippingForm({ ...shippingForm, postalCode: e.target.value })}
+                        placeholder="Postal code"
+                        className="w-full border border-cream px-4 py-3 text-xs font-sans focus:border-foreground focus:outline-none transition-colors bg-transparent rounded-none" />
                     </div>
                   </div>
 
+                  {/* Shipping Services */}
+                  {loadingShipping && (
+                    <div className="flex items-center gap-2 text-xs text-foreground/50 font-sans py-2">
+                      <Loader2 size={14} className="animate-spin" /> Calculating shipping cost...
+                    </div>
+                  )}
+                  {shippingServices.length > 0 && !loadingShipping && (
+                    <div className="space-y-2">
+                      <div className="flex items-center space-x-2 text-foreground/70">
+                        <Truck size={14} />
+                        <span className="text-[10px] tracking-wider uppercase font-sans font-medium">Shipping Method (JNE)</span>
+                      </div>
+                      <div className="space-y-2">
+                        {shippingServices.map(svc => (
+                          <label key={svc.service}
+                            className={`flex items-center justify-between p-3 border cursor-pointer transition-all text-xs font-sans ${
+                              selectedShippingLabel.includes(svc.service)
+                                ? 'border-foreground bg-foreground/5'
+                                : 'border-cream hover:border-foreground/30'
+                            }`}>
+                            <div className="flex items-center gap-3">
+                              <input type="radio" name="shipping" checked={selectedShippingLabel.includes(svc.service)}
+                                onChange={() => {
+                                  setSelectedShippingCost(svc.cost[0].value);
+                                  setSelectedShippingLabel(`JNE ${svc.service} (${svc.cost[0].etd} hari)`);
+                                }}
+                                className="accent-foreground" />
+                              <div>
+                                <span className="font-medium">JNE {svc.service}</span>
+                                <span className="text-foreground/50 ml-2">{svc.cost[0].etd} hari</span>
+                              </div>
+                            </div>
+                            <span className="font-medium">{formatRupiah(svc.cost[0].value)}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Order Summary */}
                   <div className="p-4 bg-cream/40 border border-cream space-y-2">
                     <div className="flex items-center space-x-2 text-foreground/70">
                       <CreditCard size={14} />
-                      <span className="text-[10px] tracking-wider uppercase font-sans">Payment Details</span>
+                      <span className="text-[10px] tracking-wider uppercase font-sans">Order Summary</span>
                     </div>
-                    <p className="text-xs font-sans text-foreground/50 leading-normal">
-                      Demo Order: Direct secure settlement. No actual credit card required for testing this storefront.
+                    <div className="space-y-1 text-xs font-sans text-foreground/70">
+                      <div className="flex justify-between"><span>Subtotal</span><span>{formatRupiah(cartTotal)}</span></div>
+                      {promoDiscount > 0 && <div className="flex justify-between text-emerald-600"><span>Discount</span><span>-{formatRupiah(promoDiscount)}</span></div>}
+                      <div className="flex justify-between"><span>Shipping</span><span>{selectedShippingCost > 0 ? formatRupiah(selectedShippingCost) : '—'}</span></div>
+                      <div className="flex justify-between font-semibold text-foreground pt-1 border-t border-cream mt-1">
+                        <span>Total</span><span>{formatRupiah(cartFinalTotal + selectedShippingCost)}</span>
+                      </div>
+                    </div>
+                    <p className="text-[10px] font-sans text-foreground/40 pt-1">
+                      Payment via Midtrans (GoPay, OVO, BCA VA, Credit Card, etc.)
                     </p>
                   </div>
 
                   <div className="flex space-x-3 pt-2">
-                    <button
-                      type="button"
-                      onClick={() => setCheckoutStep('cart')}
-                      className="flex-1 border border-cream py-4 text-xs tracking-[0.2em] font-sans font-medium uppercase text-foreground/60 hover:text-foreground hover:border-foreground transition-all duration-300"
-                    >
+                    <button type="button" onClick={() => setCheckoutStep('cart')}
+                      className="flex-1 border border-cream py-4 text-xs tracking-[0.2em] font-sans font-medium uppercase text-foreground/60 hover:text-foreground hover:border-foreground transition-all duration-300">
                       Back
                     </button>
-                    <button
-                      type="submit"
-                      className="flex-1 bg-foreground text-cream py-4 text-xs tracking-[0.2em] font-sans font-medium uppercase hover:bg-foreground/90 transition-all duration-300 shadow-sm"
-                    >
-                      Complete Order
+                    <button type="submit" disabled={isProcessingPayment || selectedShippingCost === 0}
+                      className="flex-1 bg-foreground text-cream py-4 text-xs tracking-[0.2em] font-sans font-medium uppercase hover:bg-foreground/90 transition-all duration-300 shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                      {isProcessingPayment ? <><Loader2 size={14} className="animate-spin" /> Processing...</> : 'Pay Now'}
                     </button>
                   </div>
                 </form>
@@ -498,7 +752,7 @@ export const CartDrawer: React.FC = () => {
                   >
                     <CheckCircle2 size={32} className="text-foreground" />
                   </motion.div>
-                  <h4 className="font-serif text-2xl text-foreground font-medium pt-2">Merci pour votre commande</h4>
+                  <h4 className="font-serif text-2xl text-foreground font-medium pt-2">Thank You for Your Order</h4>
                   <p className="text-xs text-foreground/60 font-sans max-w-xs leading-relaxed">
                     Thank you for your order, <strong>{shippingForm.name}</strong>. We've sent a detailed confirmation to <strong>{shippingForm.email}</strong>.
                   </p>
@@ -507,7 +761,7 @@ export const CartDrawer: React.FC = () => {
                     <p className="mt-2"><strong>Shipping to:</strong></p>
                     <p>{shippingForm.address}</p>
                     <p>{shippingForm.city}, {shippingForm.postalCode}</p>
-                    <p className="pt-2 text-[10px] uppercase tracking-widest text-foreground/40 font-medium">Standard Complimentary Shipping</p>
+                    <p className="pt-2 text-[10px] uppercase tracking-widest text-foreground/40 font-medium">{selectedShippingLabel || 'Standard Shipping'} — {formatRupiah(selectedShippingCost)}</p>
                   </div>
                   <div className="flex flex-col w-full space-y-2 mt-4">
                     <button
@@ -548,7 +802,7 @@ export const CartDrawer: React.FC = () => {
 
                   <div className="flex items-center justify-between text-xs tracking-wider uppercase font-sans text-foreground/50">
                     <span>Shipping</span>
-                    <span className="font-serif italic font-medium">Complimentary</span>
+                    <span className="font-sans">{selectedShippingCost > 0 ? formatRupiah(selectedShippingCost) : 'Calculated at checkout'}</span>
                   </div>
                   
                   <div className="flex items-center justify-between text-sm tracking-widest uppercase font-sans text-foreground font-semibold pt-1 border-t border-muted">

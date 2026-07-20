@@ -25,14 +25,7 @@ export const NewsletterSubscribe: React.FC = () => {
 
   return (
     <section className="bg-background py-28 border-t border-cream relative overflow-hidden" id="newsletter-subscribe-section">
-      {/* Decorative fine-line organic grids to mirror the perfume architecture */}
-      <div className="absolute inset-0 pointer-events-none opacity-[0.03]">
-        <div className="absolute left-1/4 top-0 bottom-0 w-[1px] bg-foreground" />
-        <div className="absolute left-3/4 top-0 bottom-0 w-[1px] bg-foreground" />
-        <div className="absolute top-1/3 left-0 right-0 h-[1px] bg-foreground" />
-      </div>
-
-      <div className="max-w-4xl mx-auto px-6 text-center space-y-12 relative z-10">
+            <div className="max-w-4xl mx-auto px-6 text-center space-y-12 relative z-10">
         
         {/* Editorial Headers */}
         <div className="space-y-4">

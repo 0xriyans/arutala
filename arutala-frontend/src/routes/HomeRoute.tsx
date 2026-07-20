@@ -3,6 +3,7 @@ import { Hero } from '../components/Hero';
 import { EditorialProductList } from '../components/EditorialProductList';
 import { FragranceNotes } from '../components/FragranceNotes';
 import { ScentStory } from '../components/ScentStory';
+import { PressVoices } from '../components/PressVoices';
 import { BrandStory } from '../components/BrandStory';
 import { NewsletterSubscribe } from '../components/NewsletterSubscribe';
 import { products } from '../data/products';
@@ -35,7 +36,7 @@ export const HomeRoute: React.FC = () => {
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
             <div className="space-y-2 max-w-lg">
               <p className="text-[10px] tracking-[0.3em] uppercase font-sans font-medium text-foreground/40">
-                L'Édition Permanente
+                The Permanent Edition
               </p>
               <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl font-light text-foreground tracking-tight">
                 Featured Olfactory Compositions
@@ -52,7 +53,7 @@ export const HomeRoute: React.FC = () => {
 
           {/* Editorial layout for featured products (no scroll locking) */}
           <div className="-mx-6 md:-mx-12 mt-12 overflow-hidden border-y border-cream/10">
-            <EditorialProductList limit={3} isFeaturedOnly={true} />
+            <EditorialProductList limit={3} includeSlugs={['senja', 'kala', 'aksara']} />
           </div>
 
           <div className="flex justify-center pt-8 md:hidden">
@@ -64,7 +65,7 @@ export const HomeRoute: React.FC = () => {
       </section>
 
       {/* 3. Fragrance Notes Breakdown Section */}
-      <section className="bg-muted/50 py-24 md:py-32 border-t border-b border-foreground/5" id="olfactory-architecture">
+      <section className="bg-background py-24 md:py-32 border-t border-b border-foreground/5" id="olfactory-architecture">
         <div className="max-w-7xl mx-auto px-6 md:px-12 grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20">
           
           {/* Left Column: Specimen details */}
@@ -126,7 +127,10 @@ export const HomeRoute: React.FC = () => {
       {/* 4. Brand Craftsmanship Story Strip */}
       <BrandStory />
 
-      {/* 5. Newsletter Signup */}
+      {/* 5. Press & Voices Social Proof */}
+      <PressVoices />
+
+      {/* 6. Newsletter Signup */}
       <NewsletterSubscribe />
     </div>
   );

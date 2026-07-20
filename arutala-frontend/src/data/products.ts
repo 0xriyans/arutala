@@ -49,8 +49,8 @@ export const isProductsLoaded = () => _productsLoaded;
  * Returns immediately if already loaded.
  * Multiple callers share the same in-flight promise.
  */
-export const fetchProducts = async (): Promise<Product[]> => {
-  if (_productsLoaded && products.length > 0) return products;
+export const fetchProducts = async (force: boolean = false): Promise<Product[]> => {
+  if (!force && _productsLoaded && products.length > 0) return products;
   
   if (_productsLoading && _loadPromise) return _loadPromise;
   

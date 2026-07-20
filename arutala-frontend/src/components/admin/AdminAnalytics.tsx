@@ -8,8 +8,10 @@ interface Order {
   date: string;
   total: number;
   items: {
-    productSlug: string;
-    productName: string;
+    product_slug?: string;
+    productSlug?: string; // Fallback
+    product_name?: string;
+    productName?: string; // Fallback
     quantity: number;
   }[];
 }
@@ -72,11 +74,14 @@ export const AdminAnalytics: React.FC = () => {
   const scentCounts: Record<string, { name: string, count: number }> = {};
   orders.forEach(order => {
     order.items.forEach(item => {
-      if (item.productSlug === 'shipping') return;
-      if (!scentCounts[item.productSlug]) {
-        scentCounts[item.productSlug] = { name: item.productName, count: 0 };
+      const slug = item.product_slug || item.productSlug || '';
+      const name = item.product_name || item.productName || 'Unknown Product';
+      
+      if (slug === 'shipping' || !slug) return;
+      if (!scentCounts[slug]) {
+        scentCounts[slug] = { name: name, count: 0 };
       }
-      scentCounts[item.productSlug].count += item.quantity;
+      scentCounts[slug].count += item.quantity;
     });
   });
 

@@ -3,6 +3,9 @@ import { motion } from 'motion/react';
 import { Reveal, StaggerContainer, StaggerItem } from './Reveal';
 import { Sparkles, Compass, Eye, MapPin } from 'lucide-react';
 import { ParallaxImage } from './ParallaxImage';
+import woodyImg from '../../assets/images/woody.png';
+import floralImg from '../../assets/images/floral.png';
+import citrusImg from '../../assets/images/citrus.png';
 
 interface StoryChapter {
   id: string;
@@ -30,7 +33,7 @@ const chapters: StoryChapter[] = [
     subtitle: 'Quiet Temples, Mysore Sandalwood & Fossilized Resins',
     poem: '“A low afternoon sun painting golden bands on library floors. The ancient silence of dry cedar and warm, bare skin.”',
     description: 'Our Woody collection is an architectural exploration of permanence. Composed of sustainable, cold-pressed Mysore Sandalwood, smoked Guaiacwood, and mystical Frankincense, these scents interact deeply with body chemistry to form an intensely intimate, warm aura that drys down to a velvety, quiet luxury.',
-    image: 'https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&q=80&w=1000&h=1200',
+    image: woodyImg,
     accentColor: 'text-[#C5A880]',
     ambiance: [
       { icon: <MapPin size={14} />, label: 'Terroir', value: 'Siena & Assam Highlands' },
@@ -46,7 +49,7 @@ const chapters: StoryChapter[] = [
     subtitle: 'Walled Gardens, Damascus Rose & Cashmere Linens',
     poem: '“Restraint in a loud world. A single, dewy bloom in a stone courtyard, wrapped in cashmere musks at the first light of dawn.”',
     description: 'Stripping away the heavy powder of classical bouquets, the Floral compositions celebrate single-note botanical integrity. By hand-harvesting Damascus Rose in Turkish valleys at daybreak and balancing it with wild Indian Tuberose, we construct airy, watercolors that smell of dew on grass, fresh green sap, and luxurious cashmere linens.',
-    image: 'https://images.unsplash.com/photo-1590156546746-c58d04297316?auto=format&fit=crop&q=80&w=1000&h=1200',
+    image: floralImg,
     accentColor: 'text-[#E0B2B2]',
     ambiance: [
       { icon: <MapPin size={14} />, label: 'Terroir', value: 'Java Garden & Nusantara' },
@@ -62,7 +65,7 @@ const chapters: StoryChapter[] = [
     subtitle: 'Sun-kissed Amalfi Cliffs, Orange Blossoms & Sea Breezes',
     poem: '“Sunshine distilled. Crisp, green petitgrain leaves crushed between fingers, with a salty Mediterranean breeze lifting the spirit.”',
     description: 'Our Citrus collection is a celebration of luminous, fleeting joy. Formulated as rich Eaux de Cologne Intenses, we pair cold-pressed Sicilian lemons and bitter Calabrian bergamot with creamy orange blossoms and mineral sea salt, creating a sparkling, clean, and radiant signature that floats effortlessly.',
-    image: 'https://images.unsplash.com/photo-1527661591475-527312dd65f5?auto=format&fit=crop&q=80&w=1000&h=1200',
+    image: citrusImg,
     accentColor: 'text-[#E6C687]',
     ambiance: [
       { icon: <MapPin size={14} />, label: 'Terroir', value: 'Bali Coast & Nusantara' },
@@ -74,7 +77,7 @@ const chapters: StoryChapter[] = [
 
 export const ScentStory: React.FC = () => {
   return (
-    <section className="bg-background py-28 md:py-36 border-t border-cream overflow-hidden" id="scent-stories-section">
+    <section className="bg-background border-t border-b border-foreground/10 py-24 md:py-32 relative overflow-hidden" id="scent-story-narrative">
       <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-24 md:space-y-36">
         
         {/* Intro Header */}

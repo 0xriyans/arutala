@@ -1,10 +1,11 @@
 import React from 'react';
 import { Reveal } from './Reveal';
 import { ParallaxImage } from './ParallaxImage';
+import craftedImg from '../../assets/images/crafted.png';
 
 export const BrandStory: React.FC = () => {
   return (
-    <section className="bg-cream/50 border-t border-b border-cream py-24 md:py-32 relative overflow-hidden" id="brand-story-strip">
+    <section className="bg-background border-t border-b border-foreground/10 py-24 md:py-32 relative overflow-hidden" id="brand-story-strip">
       {/* Absolute decorative geometry */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-foreground/[0.01] rounded-full blur-3xl pointer-events-none" />
 
@@ -16,7 +17,7 @@ export const BrandStory: React.FC = () => {
             <Reveal duration={1.0} yOffset={40}>
               <div className="relative aspect-[4/5] bg-background border border-cream shadow-sm overflow-hidden group">
                 <ParallaxImage
-                  src="https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&q=80&w=1000"
+                  src={craftedImg}
                   alt="Distillation of raw ingredients in our Jakarta atelier"
                   intensity={40}
                   className="w-full h-full"

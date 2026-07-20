@@ -3,6 +3,7 @@ import { Reveal } from '../components/Reveal';
 import { motion } from 'motion/react';
 import { Plus, Minus, HelpCircle, Mail, Clock, Compass, Flame, Leaf, Sparkles, ArrowRight, Eye } from 'lucide-react';
 import { ParallaxImage } from '../components/ParallaxImage';
+import { Product, products, fetchProducts, isProductsLoaded } from '../data/products';
 
 interface FAQItem {
   question: string;
@@ -13,65 +14,16 @@ interface FAQItem {
 interface JourneyMilestone {
   year: string;
   title: string;
-  subtitle: string;
-  description: string;
   scentHighlight: string;
-  keyNotes: string[];
-  imageUrl: string;
   category: string;
 }
 
 const journeyData: JourneyMilestone[] = [
-  {
-    year: "2018",
-    title: "L'Atelier de l'Ombre",
-    subtitle: "The Genesis in Jakarta",
-    description: "Our founder established a boutique micro-laboratory in Jakarta. With a single copper alembic still and a commitment to raw botanicals sourced across the rich Indonesian archipelago, we pioneered the practice of formulating with 'negative space'—allowing rare raw materials to express their natural complexities.",
-    scentHighlight: "First trial extractions of organic Turkish Rose",
-    keyNotes: ["Green Ivy", "Dewy Rose", "Damp Soil"],
-    imageUrl: "https://images.unsplash.com/photo-1547887537-6158d64c35b3?auto=format&fit=crop&q=80&w=600",
-    category: "Genesis"
-  },
-  {
-    year: "2020",
-    title: "L'Ambre Nu",
-    subtitle: "The First Signature Opus",
-    description: "The debut of our first public offering. L'Ambre Nu captured the hearts of perfume connoisseurs globally by redefining amber. We removed the heavy, heavy sweet notes, and instead paired golden labdanum resins with raw grey amber, skin-warmed sea salt, and a crystalline mineral heat.",
-    scentHighlight: "Eau de Parfum concentration (18% pure oils)",
-    keyNotes: ["Grey Amber", "Salt Crystals", "Golden Labdanum"],
-    imageUrl: "https://images.unsplash.com/photo-1594035910387-fea47794261f?auto=format&fit=crop&q=80&w=600",
-    category: "The First Opus"
-  },
-  {
-    year: "2022",
-    title: "The Botanical Expedition",
-    subtitle: "Sourcing Wild Sandalwood & Oud",
-    description: "Our master perfumer ventured to the remote forests of New Caledonia and the mountain valleys of Assam to secure sustainable, wild-harvested resins and precious woods. This journey led to the birth of Oud Imperial and Santal Blanc, stored in our signature protective dark amber bottles.",
-    scentHighlight: "Extrait de Parfum concentrations (22% pure oils)",
-    keyNotes: ["Wild Oud", "Creamy Sandalwood", "White Cardamom"],
-    imageUrl: "https://images.unsplash.com/photo-1512207724213-745524fe9000?auto=format&fit=crop&q=80&w=600",
-    category: "Exotics"
-  },
-  {
-    year: "2024",
-    title: "The Dawn Harvest Initiative",
-    subtitle: "Captured at 5:00 AM",
-    description: "We established our exclusive direct-grower partnerships in Indonesia and Turkey. Every flower blossom is picked by hand at precisely 5:00 AM before the sun warms the volatile oils. Rushed immediately to local copper stills, this preserves the ultra-realistic green leafiness of living botanical scent.",
-    scentHighlight: "Introduction of eco-certified glass and local Indonesian patchouli",
-    keyNotes: ["Jasmin Sambac", "Indonesian Patchouli", "Volatile Citrus"],
-    imageUrl: "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&q=80&w=600",
-    category: "Modern Craft"
-  },
-  {
-    year: "2026",
-    title: "Future Heritage",
-    subtitle: "Small-Batch Masterpieces",
-    description: "Continuing our dedication to olfactive minimalism, we pledge to never produce mass-market volumes. Each release remains limited to small-batch micro-runs, individually hand-poured in our Jakarta atelier, allowing us to compose living art that lingers like a sensory memory.",
-    scentHighlight: "Continuing the quest for emotional olfactory architecture",
-    keyNotes: ["Smoky Vetiver", "Bergamot Rind", "Mineral Suede"],
-    imageUrl: "https://images.unsplash.com/photo-1616949755610-8c9bbc08f138?auto=format&fit=crop&q=80&w=600",
-    category: "Future"
-  }
+  { year: "2018", title: "Rintik", scentHighlight: "First trial extractions of Indonesian Petrichor", category: "Genesis" },
+  { year: "2020", title: "Segara", scentHighlight: "Redefining marine ambergris", category: "The First Opus" },
+  { year: "2022", title: "Kala", scentHighlight: "Wild Oud and Mysore Sandalwood", category: "Exotics" },
+  { year: "2024", title: "Puspa", scentHighlight: "Dawn-harvested Jasmin Sambac", category: "Modern Craft" },
+  { year: "2026", title: "Fajar", scentHighlight: "Invigorating morning vetiver", category: "Future" }
 ];
 
 const getYearIcon = (year: string) => {
@@ -122,11 +74,24 @@ export const AboutRoute: React.FC = () => {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<'all' | 'shipping' | 'returns' | 'storage' | 'formulation'>('all');
   const [activeMilestone, setActiveMilestone] = useState<number>(0);
+  const [localProducts, setLocalProducts] = useState<Product[]>([]);
 
   // Set unique page header details on mount
   useEffect(() => {
     document.title = "Our Story — ARUTALA";
     window.scrollTo({ top: 0 });
+
+    const loadProducts = async () => {
+      if (!isProductsLoaded()) {
+        await fetchProducts();
+      }
+      setLocalProducts([...products]);
+    };
+    loadProducts();
+
+    const handleUpdate = () => setLocalProducts([...products]);
+    window.addEventListener('maison-products-updated', handleUpdate);
+    return () => window.removeEventListener('maison-products-updated', handleUpdate);
   }, []);
 
   const toggleAccordion = (index: number) => {
@@ -141,25 +106,25 @@ export const AboutRoute: React.FC = () => {
     <div className="bg-background min-h-screen pb-16 md:pb-24" id="about-route-page">
       
       {/* Pure Typography Cinematic Hero */}
-      <div className="relative w-full flex items-center justify-center pt-28 pb-12 md:pt-40 md:pb-24 border-b border-foreground/5 overflow-hidden">
+      <div className="relative w-full min-h-[100dvh] flex items-center justify-center border-b border-foreground/5 overflow-hidden">
         {/* Subtle background glow */}
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-72 h-72 md:w-96 md:h-96 bg-accent-gold/5 rounded-full blur-[80px] md:blur-[100px] pointer-events-none" />
         
-        <div className="text-center w-full space-y-6 md:space-y-8 px-6 max-w-4xl relative z-10">
+        <div className="text-center w-full space-y-6 md:space-y-8 px-4 md:px-6 max-w-4xl relative z-10">
           <Reveal className="flex flex-col items-center w-full">
             <div className="inline-flex items-center gap-4 mb-2 md:mb-4">
               <div className="w-8 md:w-12 h-[1px] bg-accent-gold/40" />
               <p className="text-[8px] md:text-[9px] tracking-[0.5em] uppercase font-sans font-medium text-accent-gold">
-                L'Atelier d'Éternel
+                Arutala Studio
               </p>
               <div className="w-8 md:w-12 h-[1px] bg-accent-gold/40" />
             </div>
             
-            <h1 className="font-serif w-full text-5xl sm:text-6xl md:text-7xl lg:text-[100px] font-light text-foreground leading-[1] md:leading-[0.85] tracking-tight mt-4 md:mt-6 px-4 md:px-0">
+            <h1 className="font-serif w-full text-4xl sm:text-5xl md:text-7xl lg:text-[100px] font-light text-foreground leading-[1.1] md:leading-[0.85] tracking-tight mt-4 md:mt-6">
               Our <span className="italic text-accent-gold/90">Craft</span> & Heritage
             </h1>
             
-            <p className="font-serif w-full text-base md:text-lg text-foreground/70 font-light max-w-xl mx-auto leading-[1.8] mt-8 md:mt-10 px-4 md:px-0">
+            <p className="font-serif w-full text-sm md:text-lg text-foreground/70 font-light max-w-xl mx-auto leading-[1.8] mt-6 md:mt-10">
               Arutala is an independent olfactory house creating small-batch botanical perfumes. We compose with a high focus on negative space—letting noble ingredients breathe rather than layering conflicting, heavy chemicals.
             </p>
             
@@ -170,10 +135,10 @@ export const AboutRoute: React.FC = () => {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-16 md:space-y-24 mt-16 md:mt-24">
+      <div className="max-w-7xl mx-auto px-4 md:px-12 space-y-12 md:space-y-24 mt-12 md:mt-24">
         
         {/* The Manifesto Quote (Replacing the Image) */}
-        <div className="w-full max-w-4xl mx-auto py-12 md:py-24 text-center relative px-6">
+        <div className="w-full max-w-4xl mx-auto py-8 md:py-24 text-center relative">
           <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 md:w-24 h-[1px] bg-accent-gold/40" />
           <Reveal yOffset={20} className="w-full">
             <p className="font-serif w-full italic text-xl sm:text-2xl md:text-4xl text-foreground/80 leading-relaxed">
@@ -246,6 +211,12 @@ export const AboutRoute: React.FC = () => {
               {journeyData.map((milestone, idx) => {
                 const isActive = activeMilestone === idx;
                 const isEven = idx % 2 === 0;
+                
+                const prod = localProducts.find(p => p.name.toLowerCase() === milestone.title.toLowerCase());
+                const displaySubtitle = prod?.subtitle || 'Loading...';
+                const displayDesc = prod?.description || 'Loading product story...';
+                const displayNotes = prod?.notes ? [prod.notes.top[0], prod.notes.heart[0], prod.notes.base[0]] : ['...', '...', '...'];
+                const displayImg = prod?.images?.scent || '';
 
                 return (
                   <div 
@@ -290,10 +261,10 @@ export const AboutRoute: React.FC = () => {
                           <h3 className="font-serif text-xl font-light text-foreground mb-1 group-hover:text-foreground transition-colors">
                             {milestone.title}
                           </h3>
-                          <p className="text-[10px] tracking-wider uppercase font-sans text-gray-400 mb-4">{milestone.subtitle}</p>
+                          <p className="text-[10px] tracking-wider uppercase font-sans text-gray-400 mb-4">{displaySubtitle}</p>
                           
                           <p className="text-xs sm:text-sm text-gray-500 font-sans font-light leading-relaxed mb-6">
-                            {milestone.description}
+                            {displayDesc}
                           </p>
 
                           {/* Interactive Notes Button */}
@@ -320,25 +291,27 @@ export const AboutRoute: React.FC = () => {
                               <div className="grid grid-cols-3 gap-3 text-center">
                                 <div className="p-2.5 bg-muted border border-cream">
                                   <span className="text-[8px] uppercase tracking-widest text-foreground/40 font-mono font-bold block mb-1">Top</span>
-                                  <span className="text-[10px] font-sans text-foreground font-medium block truncate">{milestone.keyNotes[0]}</span>
+                                  <span className="text-[10px] font-sans text-foreground font-medium block truncate">{displayNotes[0]}</span>
                                 </div>
                                 <div className="p-2.5 bg-muted border border-cream">
                                   <span className="text-[8px] uppercase tracking-widest text-foreground/40 font-mono font-bold block mb-1">Heart</span>
-                                  <span className="text-[10px] font-sans text-foreground font-medium block truncate">{milestone.keyNotes[1]}</span>
+                                  <span className="text-[10px] font-sans text-foreground font-medium block truncate">{displayNotes[1]}</span>
                                 </div>
                                 <div className="p-2.5 bg-muted border border-cream">
                                   <span className="text-[8px] uppercase tracking-widest text-foreground/40 font-mono font-bold block mb-1">Base</span>
-                                  <span className="text-[10px] font-sans text-foreground font-medium block truncate">{milestone.keyNotes[2]}</span>
+                                  <span className="text-[10px] font-sans text-foreground font-medium block truncate">{displayNotes[2]}</span>
                                 </div>
                               </div>
 
                               <div className="w-full h-36 overflow-hidden border border-cream relative">
-                                <img
-                                  src={milestone.imageUrl}
-                                  alt={milestone.title}
-                                  referrerPolicy="no-referrer"
-                                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100"
-                                />
+                                {displayImg && (
+                                  <img
+                                    src={displayImg}
+                                    alt={milestone.title}
+                                    referrerPolicy="no-referrer"
+                                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100"
+                                  />
+                                )}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
                                 <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-background/90 backdrop-blur-sm px-2 py-1 border border-cream">
                                   <Eye size={9} className="text-foreground/60" />
@@ -359,7 +332,7 @@ export const AboutRoute: React.FC = () => {
                             "{milestone.scentHighlight}"
                           </p>
                           <div className="flex gap-2 justify-end">
-                            {milestone.keyNotes.map(note => (
+                            {displayNotes.map(note => (
                               <span key={note} className="text-[8px] tracking-widest uppercase font-sans font-medium px-2 py-0.5 border border-cream/80 text-foreground/50 rounded-full">
                                 {note}
                               </span>
@@ -391,10 +364,10 @@ export const AboutRoute: React.FC = () => {
                           <h3 className="font-serif text-xl font-light text-foreground mb-1 group-hover:text-foreground transition-colors">
                             {milestone.title}
                           </h3>
-                          <p className="text-[10px] tracking-wider uppercase font-sans text-gray-400 mb-4">{milestone.subtitle}</p>
+                          <p className="text-[10px] tracking-wider uppercase font-sans text-gray-400 mb-4">{displaySubtitle}</p>
                           
                           <p className="text-xs sm:text-sm text-gray-500 font-sans font-light leading-relaxed mb-6">
-                            {milestone.description}
+                            {displayDesc}
                           </p>
 
                           {/* Interactive Notes Button */}
@@ -421,25 +394,27 @@ export const AboutRoute: React.FC = () => {
                               <div className="grid grid-cols-3 gap-3 text-center">
                                 <div className="p-2.5 bg-muted border border-cream">
                                   <span className="text-[8px] uppercase tracking-widest text-foreground/40 font-mono font-bold block mb-1">Top</span>
-                                  <span className="text-[10px] font-sans text-foreground font-medium block truncate">{milestone.keyNotes[0]}</span>
+                                  <span className="text-[10px] font-sans text-foreground font-medium block truncate">{displayNotes[0]}</span>
                                 </div>
                                 <div className="p-2.5 bg-muted border border-cream">
                                   <span className="text-[8px] uppercase tracking-widest text-foreground/40 font-mono font-bold block mb-1">Heart</span>
-                                  <span className="text-[10px] font-sans text-foreground font-medium block truncate">{milestone.keyNotes[1]}</span>
+                                  <span className="text-[10px] font-sans text-foreground font-medium block truncate">{displayNotes[1]}</span>
                                 </div>
                                 <div className="p-2.5 bg-muted border border-cream">
                                   <span className="text-[8px] uppercase tracking-widest text-foreground/40 font-mono font-bold block mb-1">Base</span>
-                                  <span className="text-[10px] font-sans text-foreground font-medium block truncate">{milestone.keyNotes[2]}</span>
+                                  <span className="text-[10px] font-sans text-foreground font-medium block truncate">{displayNotes[2]}</span>
                                 </div>
                               </div>
 
                               <div className="w-full h-36 overflow-hidden border border-cream relative">
-                                <img
-                                  src={milestone.imageUrl}
-                                  alt={milestone.title}
-                                  referrerPolicy="no-referrer"
-                                  className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100"
-                                />
+                                {displayImg && (
+                                  <img
+                                    src={displayImg}
+                                    alt={milestone.title}
+                                    referrerPolicy="no-referrer"
+                                    className="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-700 scale-105 group-hover:scale-100"
+                                  />
+                                )}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
                                 <div className="absolute bottom-3 left-3 flex items-center gap-1.5 bg-background/90 backdrop-blur-sm px-2 py-1 border border-cream">
                                   <Eye size={9} className="text-foreground/60" />
@@ -460,7 +435,7 @@ export const AboutRoute: React.FC = () => {
                             "{milestone.scentHighlight}"
                           </p>
                           <div className="flex gap-2">
-                            {milestone.keyNotes.map(note => (
+                            {displayNotes.map(note => (
                               <span key={note} className="text-[8px] tracking-widest uppercase font-sans font-medium px-2 py-0.5 border border-cream/80 text-foreground/50 rounded-full">
                                 {note}
                               </span>

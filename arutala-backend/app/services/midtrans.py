@@ -8,6 +8,11 @@ snap = midtransclient.Snap(
     client_key=settings.MIDTRANS_CLIENT_KEY
 )
 
+# Override notification URL
+snap.api_config.custom_headers = {
+    'x-override-notification': f"{settings.BASE_URL}/api/payments/midtrans/webhook"
+}
+
 def create_snap_transaction(order_id: str, gross_amount: int, customer_details: dict, item_details: list):
     """
     Create a Midtrans Snap transaction and return the token and redirect_url.

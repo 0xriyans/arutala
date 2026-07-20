@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* Hide scrollbar globally but allow scrolling */
+::-webkit-scrollbar {
+  display: none;
+}
+* {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
 @theme {
   --font-serif: "Cormorant Garamond", Georgia, serif;
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
@@ -34,3 +43,9 @@ html.dark {
   background: rgba(26, 26, 26, 0.3);
 }
 
+
+/* Fix native select options contrast in dark/light mode */
+select option {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}

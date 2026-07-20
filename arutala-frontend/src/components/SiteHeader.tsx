@@ -74,7 +74,7 @@ export const SiteHeader: React.FC = () => {
               onClick={() => navigateTo('#/shop')}
               className={`text-[10px] tracking-[0.25em] uppercase font-sans font-medium transition-colors hover:text-foreground relative pb-1 group`}
             >
-              Shop
+              Fragrances
               <span className={`absolute bottom-0 left-0 w-full h-[1px] bg-foreground transition-transform duration-300 origin-left ${currentHash === '#/shop' ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
             </button>
             <button
@@ -99,10 +99,10 @@ export const SiteHeader: React.FC = () => {
             </button>
             <button
               onClick={() => navigateTo('#/product/discovery')}
-              className={`text-[10px] tracking-[0.25em] uppercase font-sans font-medium text-accent-gold transition-colors hover:opacity-80 relative pb-1 group`}
+              className={`text-[10px] tracking-[0.25em] uppercase font-sans font-medium transition-colors hover:text-foreground relative pb-1 group`}
             >
               Discovery
-              <span className={`absolute bottom-0 left-0 w-full h-[1px] bg-accent-gold transition-transform duration-300 origin-left ${currentHash === '#/product/discovery' ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
+              <span className={`absolute bottom-0 left-0 w-full h-[1px] bg-foreground transition-transform duration-300 origin-left ${currentHash === '#/product/discovery' ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`} />
             </button>
 
           </nav>
@@ -222,17 +222,17 @@ export const SiteHeader: React.FC = () => {
                     onClick={() => navigateTo('#/shop')}
                     className="text-left font-serif text-2xl hover:italic hover:text-accent duration-200 transition-all"
                   >
-                    The Collection
+                    Fragrances
                   </button>
                   <button
                     onClick={() => navigateTo('#/about')}
                     className="text-left font-serif text-2xl hover:italic hover:text-accent duration-200 transition-all"
                   >
-                    Our Craft
+                    Story
                   </button>
                   <button
                     onClick={() => navigateTo('#/product/discovery')}
-                    className="text-left font-serif text-2xl hover:italic text-accent-gold duration-200 transition-all"
+                    className="text-left font-serif text-2xl hover:italic hover:text-accent duration-200 transition-all"
                   >
                     Discovery
                   </button>
@@ -258,32 +258,17 @@ export const SiteHeader: React.FC = () => {
                       Login
                     </button>
                   )}
-                  <button
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      setTimeout(() => {
-                        const el = document.getElementById('featured-collection');
-                        if (el) el.scrollIntoView({ behavior: 'smooth' });
-                      }, 100);
-                    }}
-                    className="text-left font-serif text-2xl hover:italic hover:text-accent duration-200 transition-all"
-                  >
-                    Fragrance Families
-                  </button>
                   
-                  <div className="mt-8 pt-8 border-t border-cream">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] tracking-[0.2em] font-sans font-medium uppercase text-foreground/40">
-                        Night Mode
-                      </span>
-                      <button
-                        onClick={toggleTheme}
-                        className="p-2 border border-cream rounded-full hover:bg-foreground/5 transition-colors text-foreground flex items-center justify-center"
-                        aria-label="Toggle dark mode"
-                      >
-                        {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
-                      </button>
-                    </div>
+                  <div className="pt-6 mt-6 border-t border-cream">
+                    <button
+                      onClick={toggleTheme}
+                      className="flex items-center gap-4 text-left font-serif text-xl hover:italic hover:text-accent duration-200 transition-all text-foreground/80"
+                    >
+                      {theme === 'dark' ? 'Light Mode' : 'Night Mode'}
+                      <div className="text-foreground/50">
+                        {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                      </div>
+                    </button>
                   </div>
                 </nav>
               </div>

@@ -21,6 +21,19 @@ class Settings(BaseSettings):
 
     # Google Client ID
     GOOGLE_CLIENT_ID: str = os.getenv("GOOGLE_CLIENT_ID", "")
+    
+    # Email Settings
+    SMTP_SERVER: str = os.getenv("SMTP_SERVER", "smtp.gmail.com")
+    SMTP_PORT: int = int(os.getenv("SMTP_PORT", "587"))
+    SMTP_USER: str = os.getenv("SMTP_USER", "")
+    SMTP_PASSWORD: str = os.getenv("SMTP_PASSWORD", "")
+    
+    # App Settings
+    FRONTEND_URL: str = os.getenv("FRONTEND_URL", "http://localhost:3000")
+    BASE_URL: str = os.getenv("BASE_URL", "http://localhost:8000")
+    
+    # Shipping API
+    RAJAONGKIR_API_KEY: str = os.getenv("RAJAONGKIR_API_KEY", "")
 
     class Config:
         env_file = ".env"

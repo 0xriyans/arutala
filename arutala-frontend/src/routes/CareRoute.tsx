@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { Reveal, StaggerContainer, StaggerItem } from '../components/Reveal';
 import { ParallaxImage } from '../components/ParallaxImage';
 import { Sun, Droplet, Wind, Sparkles } from 'lucide-react';
+import bottleImg from '../../assets/images/bottle.png';
 
 export const CareRoute: React.FC = () => {
   useEffect(() => {
@@ -10,8 +11,11 @@ export const CareRoute: React.FC = () => {
   }, []);
 
   return (
-    <div className="bg-background min-h-screen pt-32 pb-24" id="care-guide-page">
-      <div className="max-w-5xl mx-auto px-6 md:px-12 space-y-24">
+    <div className="bg-background min-h-screen pt-32 pb-24 relative" id="care-guide-page">
+      {/* Subtle background glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-96 h-96 bg-accent-gold/5 rounded-full blur-[100px] pointer-events-none" />
+      
+      <div className="max-w-5xl mx-auto px-6 md:px-12 space-y-24 relative z-10">
         
         {/* Header */}
         <Reveal yOffset={30}>
@@ -32,7 +36,7 @@ export const CareRoute: React.FC = () => {
         <Reveal duration={1.0}>
           <div className="w-full aspect-[21/9] bg-cream/20 relative overflow-hidden border border-foreground/5 shadow-sm">
             <ParallaxImage 
-              src="https://images.unsplash.com/photo-1616604847422-77983617fcbd?auto=format&fit=crop&q=80&w=2000"
+              src={bottleImg}
               alt="Light filtering through amber glass"
               intensity={30}
               className="w-full h-full object-cover"

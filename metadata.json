@@ -1,6 +1,0 @@
-{
-  "name": "ARUTALA",
-  "description": "A single-brand luxury perfume storefront focused on elegant typography, spacious layout, and refined motion.",
-  "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
-}

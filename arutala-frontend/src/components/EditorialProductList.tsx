@@ -7,11 +7,26 @@ import { ParallaxImage } from './ParallaxImage';
 interface EditorialProductListProps {
   limit?: number;
   isFeaturedOnly?: boolean;
+  excludeSlugs?: string[];
+  includeSlugs?: string[];
 }
 
-export const EditorialProductList: React.FC<EditorialProductListProps> = ({ limit, isFeaturedOnly = false }) => {
+export const EditorialProductList: React.FC<EditorialProductListProps> = ({ limit, isFeaturedOnly = false, excludeSlugs = [], includeSlugs }) => {
   const collectionProducts = products.filter(p => p.showInCollection !== false);
-  const filteredProducts = isFeaturedOnly ? collectionProducts.filter(p => p.isFeatured) : collectionProducts;
+  
+  let filteredProducts = collectionProducts;
+  if (includeSlugs && includeSlugs.length > 0) {
+    // Exact match and order by includeSlugs
+    filteredProducts = includeSlugs
+      .map(slug => collectionProducts.find(p => p.slug === slug))
+      .filter(Boolean) as typeof products;
+  } else {
+    filteredProducts = collectionProducts.filter(p => !excludeSlugs.includes(p.slug));
+    if (isFeaturedOnly) {
+      filteredProducts = filteredProducts.filter(p => p.isFeatured);
+    }
+  }
+  
   const displayedProducts = limit ? filteredProducts.slice(0, limit) : filteredProducts;
 
   const handleNavigateToDetails = (slug: string) => {

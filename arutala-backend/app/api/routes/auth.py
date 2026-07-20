@@ -12,8 +12,8 @@ from app.core.config import settings
 from fastapi.security import OAuth2PasswordBearer
 import jwt
 # Wait, we used PyJWT in security! Let's define the dependency properly.
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="api/auth/login", auto_error=False)
 
 def get_current_user(token: str = Depends(oauth2_scheme), session: Session = Depends(get_session)):
     credentials_exception = HTTPException(
@@ -34,6 +34,20 @@ def get_current_user(token: str = Depends(oauth2_scheme), session: Session = Dep
         raise credentials_exception
     return user
 
+def get_current_user_optional(token: str = Depends(oauth2_scheme_optional), session: Session = Depends(get_session)):
+    if not token:
+        return None
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
+        email: str = payload.get("sub")
+        if email is None:
+            return None
+    except jwt.PyJWTError:
+        return None
+        
+    user = session.exec(select(User).where(User.email == email)).first()
+    return user
+
 def get_current_admin(current_user: User = Depends(get_current_user)):
     if current_user.role != "admin":
         raise HTTPException(
@@ -44,8 +58,11 @@ def get_current_admin(current_user: User = Depends(get_current_user)):
 
 router = APIRouter()
 
-@router.post("/register", response_model=UserRead)
+@router.post("/register", response_model=UserRead, summary="Register new user")
 def register(user: UserCreate, session: Session = Depends(get_session)):
+    """
+    Register a new customer account. Validates if the email already exists.
+    """
     existing = session.exec(select(User).where(User.email == user.email)).first()
     if existing:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -64,8 +81,11 @@ def register(user: UserCreate, session: Session = Depends(get_session)):
     session.refresh(new_user)
     return new_user
 
-@router.post("/login")
+@router.post("/login", summary="Login user")
 def login(user_data: UserLogin, session: Session = Depends(get_session)):
+    """
+    Authenticate user using email and password. Returns a JWT Bearer access token.
+    """
     user = session.exec(select(User).where(User.email == user_data.email)).first()
     if not user or not verify_password(user_data.password, user.passwordHash):
         raise HTTPException(status_code=401, detail="Invalid email or password")
@@ -76,12 +96,18 @@ def login(user_data: UserLogin, session: Session = Depends(get_session)):
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
-@router.get("/me", response_model=UserRead)
+@router.get("/me", response_model=UserRead, summary="Get current user details")
 def get_me(current_user: User = Depends(get_current_user)):
+    """
+    Fetch the profile data for the currently authenticated user based on JWT token.
+    """
     return current_user
 
-@router.put("/profile", response_model=UserRead)
+@router.put("/profile", response_model=UserRead, summary="Update user profile")
 def update_profile(data: UserProfileUpdate, current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    """
+    Update personal information such as name, address, city, and postal code.
+    """
     current_user.name = data.name
     current_user.address = data.address
     current_user.city = data.city
@@ -92,8 +118,11 @@ def update_profile(data: UserProfileUpdate, current_user: User = Depends(get_cur
     session.refresh(current_user)
     return current_user
 
-@router.post("/change-password")
+@router.post("/change-password", summary="Change user password")
 def change_password(data: ChangePasswordRequest, current_user: User = Depends(get_current_user), session: Session = Depends(get_session)):
+    """
+    Change the account password. Requires verification of the old password.
+    """
     if not verify_password(data.old_password, current_user.passwordHash):
         raise HTTPException(status_code=400, detail="Incorrect old password")
     
@@ -102,8 +131,11 @@ def change_password(data: ChangePasswordRequest, current_user: User = Depends(ge
     session.commit()
     return {"message": "Password changed successfully"}
 
-@router.post("/forgot-password")
+@router.post("/forgot-password", summary="Forgot password request")
 def forgot_password(data: ForgotPasswordRequest, session: Session = Depends(get_session)):
+    """
+    Initiate the password reset process. Generates a temporary reset token.
+    """
     user = session.exec(select(User).where(User.email == data.email)).first()
     if not user:
         # For security, we don't disclose if user exists or not, but for convenience in mock we can or just return status.
@@ -127,8 +159,11 @@ def forgot_password(data: ForgotPasswordRequest, session: Session = Depends(get_
         "token": reset_token
     }
 
-@router.post("/reset-password")
+@router.post("/reset-password", summary="Reset password using token")
 def reset_password(data: ResetPasswordRequest, session: Session = Depends(get_session)):
+    """
+    Set a new password using a valid reset token generated by /forgot-password.
+    """
     try:
         payload = jwt.decode(data.token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
         email: str = payload.get("sub")
@@ -147,8 +182,11 @@ def reset_password(data: ResetPasswordRequest, session: Session = Depends(get_se
     session.commit()
     return {"message": "Password has been reset successfully"}
 
-@router.post("/google")
+@router.post("/google", summary="Login or register via Google")
 def google_login(data: GoogleLoginRequest, session: Session = Depends(get_session)):
+    """
+    Verify Google OAuth token and authenticate user. Registers user automatically if they don't exist.
+    """
     try:
         client_id = settings.GOOGLE_CLIENT_ID
         if not client_id:

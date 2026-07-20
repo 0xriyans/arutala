@@ -19,6 +19,10 @@ import { LoginRoute } from './routes/LoginRoute';
 import { RegisterRoute } from './routes/RegisterRoute';
 import { TrackOrderRoute } from './routes/TrackOrderRoute';
 import { ProfileRoute } from './routes/ProfileRoute';
+import { PaymentRoute } from './routes/PaymentRoute';
+import { ForgotPasswordRoute } from './routes/ForgotPasswordRoute';
+import { ResetPasswordRoute } from './routes/ResetPasswordRoute';
+import { ChatWidget } from './components/ChatWidget';
 import { motion, AnimatePresence } from 'motion/react';
 import { ScrollProgress } from './components/ScrollProgress';
 import { CustomCursor } from './components/CustomCursor';
@@ -79,9 +83,18 @@ export default function App() {
     if (currentHash === '#/profile') {
       return <ProfileRoute />;
     }
+    if (currentHash.startsWith('#/payment')) {
+      return <PaymentRoute />;
+    }
+    if (currentHash.startsWith('#/forgot-password')) {
+      return <ForgotPasswordRoute />;
+    }
+    if (currentHash.startsWith('#/reset-password')) {
+      return <ResetPasswordRoute />;
+    }
     
-    if (currentHash === '#/product/discovery') {
-      return <DiscoverySetRoute />;
+    if (currentHash === '#/product/discovery' || currentHash === '#/product/discovery-set') {
+      return <ProductDetailRoute slug="discovery-set" />;
     }
 
     if (currentHash === '#/care') {
@@ -161,6 +174,7 @@ export default function App() {
         {/* Global Minimalist Footer */}
         <Footer />
         <ToastContainer />
+        {(currentHash === '#/' || currentHash === '') && <ChatWidget />}
           </div>
         </CartProvider>
         </ToastProvider>

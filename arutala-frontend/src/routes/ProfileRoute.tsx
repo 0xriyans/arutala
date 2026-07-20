@@ -7,7 +7,7 @@ import { useToast } from '../context/toast-context';
 
 export const ProfileRoute: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'orders' | 'details' | 'addresses'>('orders');
-  const { user, isAuthenticated, logout, token, fetchUser } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const { addToast } = useToast();
 
   const [orders, setOrders] = useState<any[]>([]);
@@ -31,22 +31,25 @@ export const ProfileRoute: React.FC = () => {
 
   // Fetch orders and stats
   useEffect(() => {
-    if (!isAuthenticated || !token) return;
+    if (!isAuthenticated) return;
     
     const fetchData = async () => {
       try {
         if (user?.role !== 'admin') {
           // Fetch user orders
-          const res = await fetch('http://localhost:8000/api/orders/me', { headers: { Authorization: `Bearer ${token}` } });
-          const myOrders = await res.json();
-          setOrders(myOrders);
+          const authToken = localStorage.getItem('arutala_token');
+          const res = await fetch('/api/orders/me', { headers: { Authorization: `Bearer ${authToken}` } });
+          if (res.ok) {
+            const myOrders = await res.json();
+            setOrders(myOrders);
+          }
         }
       } catch (err) {
         console.error("Failed to fetch profile data", err);
       }
     };
     fetchData();
-  }, [isAuthenticated, user, token]);
+  }, [isAuthenticated, user]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -185,7 +188,7 @@ export const ProfileRoute: React.FC = () => {
                         <div key={order.id} className="border border-cream bg-background hover:border-foreground/20 transition-colors">
                           <div className="p-6 flex flex-col md:flex-row justify-between gap-4 border-b border-cream/50">
                             <div className="space-y-1">
-                              <p className="text-xs text-foreground/50 font-sans">Order #{String(order.id).substring(0, 8)}</p>
+                              <p className="text-xs text-foreground/50 font-sans">Order {order.order_ref || `#${order.id}`}</p>
                               <p className="text-sm font-serif font-medium">{formatRupiah(order.total)}</p>
                             </div>
                             <div className="text-right">
