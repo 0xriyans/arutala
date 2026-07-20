@@ -7,6 +7,7 @@ import { Plus, Minus, ArrowLeft, ShoppingBag, Truck, Sparkles, AlertTriangle, Dr
 import { motion } from 'motion/react';
 
 import { ProgressiveImage } from '../components/ProgressiveImage';
+import { ChatWidget } from '../components/ChatWidget';
 
 const ProductDetailSkeleton: React.FC = () => {
   return (
@@ -800,6 +801,8 @@ export const ProductDetailRoute: React.FC<ProductDetailRouteProps> = ({ slug }) 
 
 
       </div>
+      
+      {product.slug === 'discovery-set' && <ChatWidget />}
     </div>
   );
 };

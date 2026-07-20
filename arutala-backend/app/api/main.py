@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from app.api.routes import auth, products, orders, promos, shipping, admin, payments, lookups, quizzes
+from app.api.routes import auth, products, orders, promos, shipping, admin, payments, lookups, quizzes, chat
 
 api_router = APIRouter()
 api_router.include_router(auth.router, prefix="/auth", tags=["auth"])
@@ -11,3 +11,4 @@ api_router.include_router(admin.router, prefix="/admin", tags=["admin"])
 api_router.include_router(payments.router, prefix="/payments", tags=["payments"])
 api_router.include_router(lookups.router, prefix="/lookups", tags=["lookups"])
 api_router.include_router(quizzes.router, prefix="/quizzes", tags=["quizzes"])
+api_router.include_router(chat.router, prefix="/chat", tags=["chat"])

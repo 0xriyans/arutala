@@ -4,6 +4,7 @@ import { useCart } from '../context/cart-context';
 import { Reveal, StaggerContainer, StaggerItem } from '../components/Reveal';
 import { ParallaxImage } from '../components/ParallaxImage';
 import { MailOpen, Compass, Gift, ChevronDown } from 'lucide-react';
+import { ChatWidget } from '../components/ChatWidget';
 
 export const DiscoverySetRoute: React.FC = () => {
   const { addToCart } = useCart();
@@ -268,7 +269,6 @@ export const DiscoverySetRoute: React.FC = () => {
 
         </div>
       </div>
-
     </div>
   );
 };
